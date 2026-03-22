@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Provision demo data: creates an admin user, a sample problem, and loads .SCN fixtures.
+"""Provision demo data: syncs DecisionLab users, creates sample problems, and loads .SCN fixtures.
 
 Usage:
     python -m scripts.provision_demo
@@ -22,29 +22,37 @@ from app.storage.store import storage
 USERS_KEY = "data/users.json"
 DOCS_DIR = Path(__file__).resolve().parent.parent / "docs"
 
-ADMIN_USER = {
-    "id": str(uuid.uuid4()),
-    "username": "admin",
-    "passwordHash": "",  # filled below
-    "role": "admin",
-    "displayName": "Administrator",
-    "createdAt": datetime.now(timezone.utc).isoformat(),
-    "loginAttempts": 0,
-    "locked": False,
-    "lastLogin": None,
-}
-
-DEMO_USER = {
-    "id": str(uuid.uuid4()),
-    "username": "analyst",
-    "passwordHash": "",
-    "role": "user",
-    "displayName": "Demo Analyst",
-    "createdAt": datetime.now(timezone.utc).isoformat(),
-    "loginAttempts": 0,
-    "locked": False,
-    "lastLogin": None,
-}
+# ── DecisionLab classlist ────────────────────────────────────────────
+CLASSLIST = [
+    {"first": "Jose", "last": "Mendoza", "email": "jm10697@nyu.edu", "password": "LimeKoala1!", "role": "admin"},
+    {"first": "Jose", "last": "Mendoza", "email": "josermendoza@icloud.com", "password": "LimeKoala1!", "role": "admin"},
+    {"first": "Montserrat", "last": "Avila Muñoz", "email": "ma9876@nyu.edu", "password": "RedLion1", "role": "user"},
+    {"first": "Carlos", "last": "Bernal", "email": "cab10151@nyu.edu", "password": "BlueTiger2", "role": "user"},
+    {"first": "Annika", "last": "Brown", "email": "anb6060@nyu.edu", "password": "GreenBear3", "role": "user"},
+    {"first": "Valerie", "last": "Cadena", "email": "vac340@nyu.edu", "password": "YellowWolf4", "role": "user"},
+    {"first": "Juan Pablo", "last": "Cajiga Gordillo", "email": "jcg533@nyu.edu", "password": "OrangeDeer5", "role": "user"},
+    {"first": "Charlotte", "last": "Detwiler", "email": "cd4020@nyu.edu", "password": "PurpleEagle6", "role": "user"},
+    {"first": "Chris", "last": "Dillmeier", "email": "cwd8685@nyu.edu", "password": "WhiteFox7", "role": "user"},
+    {"first": "Xuke", "last": "Feng", "email": "xf931@nyu.edu", "password": "BlackHawk8", "role": "user"},
+    {"first": "Keri", "last": "Kaleja", "email": "kk5887@nyu.edu", "password": "SilverLynx9", "role": "user"},
+    {"first": "Hallie", "last": "Lau", "email": "hl6614@nyu.edu", "password": "GoldPanda1", "role": "user"},
+    {"first": "Natalie", "last": "Lee", "email": "nl3125@nyu.edu", "password": "BrownOtter2", "role": "user"},
+    {"first": "Jiayi", "last": "Li", "email": "jl17781@nyu.edu", "password": "TealRaven3", "role": "user"},
+    {"first": "Xinjue", "last": "Li", "email": "xl6160@nyu.edu", "password": "PinkShark4", "role": "user"},
+    {"first": "Cheryl", "last": "Liang", "email": "chl6920@nyu.edu", "password": "GrayWhale5", "role": "user"},
+    {"first": "Weilin", "last": "Liang", "email": "wl3557@nyu.edu", "password": "VioletZebra6", "role": "user"},
+    {"first": "Camila", "last": "Lievano", "email": "mcl9746@nyu.edu", "password": "IndigoSwan7", "role": "user"},
+    {"first": "Skylar", "last": "Lin", "email": "rl5858@nyu.edu", "password": "MaroonOwl8", "role": "user"},
+    {"first": "Juliana", "last": "Martinez Aparicio", "email": "jm11756@nyu.edu", "password": "NavyFalcon9", "role": "user"},
+    {"first": "Kristen", "last": "Miao", "email": "jm11696@nyu.edu", "password": "AquaDolphin2", "role": "user"},
+    {"first": "Vanessa Cibelle", "last": "Moura Caxias", "email": "vm2806@nyu.edu", "password": "CoralCheetah3", "role": "user"},
+    {"first": "Jiaying", "last": "Pan", "email": "jp7862@nyu.edu", "password": "BeigeBadger4", "role": "user"},
+    {"first": "Sasha", "last": "Rachmadi", "email": "sfr9778@nyu.edu", "password": "CyanCobra5", "role": "user"},
+    {"first": "Lanie", "last": "Veazey", "email": "lmv9494@nyu.edu", "password": "MagentaMoose6", "role": "user"},
+    {"first": "Senette", "last": "Wiah", "email": "sw7168@nyu.edu", "password": "OliveOcelot7", "role": "user"},
+    {"first": "Fangyuan", "last": "Zheng", "email": "fz2481@nyu.edu", "password": "PeachPython8", "role": "user"},
+    {"first": "Haihua", "last": "Zhu", "email": "hz4386@nyu.edu", "password": "RubyRhino9", "role": "user"},
+]
 
 
 def _build_sample_problem() -> dict:
@@ -84,27 +92,26 @@ def _build_sample_problem() -> dict:
 async def provision():
     await storage.initialize()
 
-    # --- Users ---
-    existing = await storage.read_json(USERS_KEY)
-    if existing and len(existing.get("users", [])) > 0:
-        print("Users already exist — skipping user creation.")
-        print("  Existing users:", [u["username"] for u in existing["users"]])
-    else:
-        ADMIN_USER["passwordHash"] = hash_password("admin123")
-        DEMO_USER["passwordHash"] = hash_password("analyst123")
-        await storage.write_json(USERS_KEY, {"users": [ADMIN_USER, DEMO_USER]})
-        print("Created users:")
-        print(f"  admin / admin123  (role: admin)")
-        print(f"  analyst / analyst123  (role: user)")
+    # --- Sync users from classlist (always overwrite) ---
+    users = []
+    for entry in CLASSLIST:
+        users.append({
+            "id": str(uuid.uuid4()),
+            "username": entry["email"].split("@")[0],
+            "passwordHash": hash_password(entry["password"]),
+            "role": entry["role"],
+            "displayName": f"{entry['first']} {entry['last']}",
+            "email": entry["email"],
+            "createdAt": datetime.now(timezone.utc).isoformat(),
+            "loginAttempts": 0,
+            "locked": False,
+            "lastLogin": None,
+        })
+    await storage.write_json(USERS_KEY, {"users": users})
+    print(f"Synced {len(users)} users from DecisionLab classlist.")
 
-    # --- Sample problem for demo user ---
-    user_id = DEMO_USER["id"]
-    # Re-read users to get actual IDs if they already existed
-    users_data = await storage.read_json(USERS_KEY)
-    for u in users_data.get("users", []):
-        if u["username"] == "analyst":
-            user_id = u["id"]
-            break
+    # --- Sample problem for first admin user ---
+    user_id = users[0]["id"]
 
     index_key = f"users/{user_id}/problems/index.json"
     index = await storage.read_json(index_key)

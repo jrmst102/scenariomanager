@@ -1,9 +1,12 @@
-"""Authentication routes: login, logout, session, password change."""
+"""Authentication routes: login, logout, session, password change, SSO."""
 
+import logging
+import os
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
+import jwt as pyjwt
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -22,8 +25,11 @@ router = APIRouter()
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "web" / "templates"))
 
+logger = logging.getLogger(__name__)
+
 USERS_KEY = "data/users.json"
 MAX_LOGIN_ATTEMPTS = 3
+TOOL_SSO_SECRET = os.environ.get("TOOL_SSO_SECRET_SCENARIO_SIM") or os.environ.get("TOOL_SSO_SECRET", "tool-sso-secret-change-me")
 
 
 async def _get_users() -> list[dict]:
@@ -134,3 +140,64 @@ async def change_password(body: ChangePasswordRequest, user: dict = Depends(get_
     full_user["passwordHash"] = hash_password(body.newPassword)
     await _update_user(full_user)
     return {"message": "Password changed successfully"}
+
+
+# ── SSO from DecisionLab ──────────────────────────────────────────────
+
+async def _find_or_create_sso_user(email: str, role: str) -> dict:
+    """Find user by email, or create a new one. Returns the user dict."""
+    users = await _get_users()
+    for u in users:
+        if u.get("email", "").strip().lower() == email.strip().lower():
+            return u
+
+    # Create new user
+    local_part = email.split("@")[0] if "@" in email else email
+    new_user = {
+        "id": str(uuid.uuid4()),
+        "username": local_part,
+        "passwordHash": hash_password(uuid.uuid4().hex),
+        "role": "admin" if role == "ADMIN" else "user",
+        "displayName": local_part.replace(".", " ").title(),
+        "email": email,
+        "createdAt": datetime.now(timezone.utc).isoformat(),
+        "loginAttempts": 0,
+        "locked": False,
+        "lastLogin": None,
+    }
+    users.append(new_user)
+    await _save_users(users)
+    return new_user
+
+
+@router.get("/auth/sso")
+async def sso_login(request: Request, token: str = ""):
+    """Verify a DecisionLab SSO JWT and establish a session."""
+    if not token:
+        return RedirectResponse(url="/", status_code=302)
+
+    try:
+        payload = pyjwt.decode(token, TOOL_SSO_SECRET, algorithms=["HS256"])
+    except pyjwt.ExpiredSignatureError:
+        logger.warning("SSO token expired")
+        return RedirectResponse(url="/", status_code=302)
+    except pyjwt.InvalidTokenError:
+        logger.warning("Invalid SSO token")
+        return RedirectResponse(url="/", status_code=302)
+
+    email = payload.get("email", "")
+    role = payload.get("role", "user")
+
+    if not email:
+        return RedirectResponse(url="/", status_code=302)
+
+    try:
+        user = await _find_or_create_sso_user(email, role)
+    except Exception:
+        logger.exception("SSO user provisioning failed")
+        return RedirectResponse(url="/", status_code=302)
+
+    redirect_url = "/problems"
+    response = RedirectResponse(url=redirect_url, status_code=302)
+    set_auth_cookie(response, user["id"], user.get("role", "user"))
+    return response
