@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment — {{ problem.title }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <nav class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+        <h1 class="text-lg font-bold text-gray-900">Scenario Planning Studio</h1>
+        <div class="flex items-center gap-3">
+            <span class="text-sm text-gray-500">Participant: {{ participant.name }}</span>
+            <span id="progress" class="text-sm text-blue-600 font-medium">{{ completed }}/{{ total }}</span>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-6 py-8">
+        <!-- Read-only Problem Context -->
+        <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-900">{{ problem.title }}</h2>
+            <p class="text-gray-600 mt-2">{{ problem.description }}</p>
+
+            <div class="grid grid-cols-2 gap-4 mt-4 text-sm">
+                <div>
+                    <strong>X-Axis:</strong> {{ problem.axes.x.label }}
+                    <div class="text-xs text-gray-500 mt-1">
+                        {{ problem.axes.x.highPole.label }} ↔ {{ problem.axes.x.lowPole.label }}
+                    </div>
+                </div>
+                <div>
+                    <strong>Y-Axis:</strong> {{ problem.axes.y.label }}
+                    <div class="text-xs text-gray-500 mt-1">
+                        {{ problem.axes.y.highPole.label }} ↔ {{ problem.axes.y.lowPole.label }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mini Scenario Matrix -->
+            <div class="grid grid-cols-2 gap-3 mt-4">
+                {% for s in problem.scenarios %}
+                <div class="border rounded-lg p-3 text-sm
+                    {% if s.xPole == 'high' and s.yPole == 'low' %}bg-blue-50 border-blue-200
+                    {% elif s.xPole == 'high' and s.yPole == 'high' %}bg-amber-50 border-amber-200
+                    {% elif s.xPole == 'low' and s.yPole == 'high' %}bg-red-50 border-red-200
+                    {% else %}bg-green-50 border-green-200{% endif %}">
+                    <strong>{{ s.name or s.id }}</strong>
+                    <p class="text-xs text-gray-600 mt-1">{{ s.narrative }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if not round_open %}
+        <div class="bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded-lg mb-6">
+            This round is currently closed. You cannot submit changes.
+        </div>
+        {% endif %}
+
+        <!-- Assessment Grid -->
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <table class="w-full">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                        <th class="text-left px-4 py-3 text-sm font-medium text-gray-700">Alternative</th>
+                        {% for s in problem.scenarios %}
+                        <th class="text-center px-4 py-3 text-sm font-medium text-gray-700">
+                            {{ s.name or s.id }}
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for alt in problem.alternatives %}
+                    <tr class="border-b border-gray-100">
+                        <td class="px-4 py-3">
+                            <div class="font-medium text-sm text-gray-800">{{ alt.id }}. {{ alt.name }}</div>
+                            {% if alt.description %}
+                            <div class="text-xs text-gray-500">{{ alt.description }}</div>
+                            {% endif %}
+                        </td>
+                        {% for s in problem.scenarios %}
+                        <td class="px-4 py-3 text-center">
+                            <select data-cell="{{ alt.id }}_{{ s.id }}" data-field="score"
+                                    class="assessment-cell w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                    {% if not round_open %}disabled{% endif %}>
+                                <option value="">—</option>
+                                <option value="1" {% if assessment.get(alt.id ~ '_' ~ s.id, {}).get('score') == 1 %}selected{% endif %}>1 – Very Weak</option>
+                                <option value="2" {% if assessment.get(alt.id ~ '_' ~ s.id, {}).get('score') == 2 %}selected{% endif %}>2 – Weak</option>
+                                <option value="3" {% if assessment.get(alt.id ~ '_' ~ s.id, {}).get('score') == 3 %}selected{% endif %}>3 – Moderate</option>
+                                <option value="4" {% if assessment.get(alt.id ~ '_' ~ s.id, {}).get('score') == 4 %}selected{% endif %}>4 – Strong</option>
+                                <option value="5" {% if assessment.get(alt.id ~ '_' ~ s.id, {}).get('score') == 5 %}selected{% endif %}>5 – Very Strong</option>
+                            </select>
+                            <textarea data-cell="{{ alt.id }}_{{ s.id }}" data-field="rationale"
+                                      rows="2" placeholder="Rationale..."
+                                      class="assessment-cell w-full mt-1 px-2 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-blue-400 outline-none"
+                                      {% if not round_open %}disabled{% endif %}>{{ assessment.get(alt.id ~ '_' ~ s.id, {}).get('rationale', '') }}</textarea>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if round_open %}
+        <div class="flex gap-4 mt-6">
+            <button id="save-draft-btn"
+                    class="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition font-medium">
+                Save Draft
+            </button>
+            <button id="submit-btn"
+                    class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium">
+                Submit Assessment
+            </button>
+        </div>
+        {% endif %}
+    </main>
+
+    <script>
+        const PROBLEM_ID = '{{ problem.problemId }}';
+        const TOKEN = '{{ participant.token }}';
+        const ROUND_OPEN = {{ 'true' if round_open else 'false' }};
+
+        function collectCells() {
+            const cells = {};
+            document.querySelectorAll('select[data-cell]').forEach(el => {
+                const cellKey = el.dataset.cell;
+                if (!cells[cellKey]) cells[cellKey] = {};
+                const score = el.value ? parseInt(el.value) : null;
+                if (score !== null) cells[cellKey].score = score;
+            });
+            document.querySelectorAll('textarea[data-cell]').forEach(el => {
+                const cellKey = el.dataset.cell;
+                if (!cells[cellKey]) cells[cellKey] = {};
+                cells[cellKey].rationale = el.value;
+            });
+            return cells;
+        }
+
+        function updateProgress() {
+            const selects = document.querySelectorAll('select[data-cell]');
+            let filled = 0;
+            selects.forEach(el => { if (el.value) filled++; });
+            document.getElementById('progress').textContent = `${filled}/${selects.length}`;
+        }
+
+        document.querySelectorAll('select[data-cell]').forEach(el => {
+            el.addEventListener('change', updateProgress);
+        });
+
+        async function saveAssessment(submit = false) {
+            const cells = collectCells();
+            const res = await fetch(`/api/v1/participate/${PROBLEM_ID}/${TOKEN}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({cells, submit}),
+            });
+            const data = await res.json();
+            if (submit && res.ok) {
+                window.location.href = `/participate/${PROBLEM_ID}/${TOKEN}/done`;
+            } else if (!res.ok) {
+                alert(data.detail || 'Error saving assessment');
+            }
+            return res.ok;
+        }
+
+        if (document.getElementById('save-draft-btn')) {
+            document.getElementById('save-draft-btn').addEventListener('click', () => saveAssessment(false));
+        }
+        if (document.getElementById('submit-btn')) {
+            document.getElementById('submit-btn').addEventListener('click', () => {
+                if (confirm('Submit your assessment? You can revise it while the round is open.')) {
+                    saveAssessment(true);
+                }
+            });
+        }
+
+        updateProgress();
+    </script>
+</body>
+</html>

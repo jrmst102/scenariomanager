@@ -1,0 +1,29 @@
+/* Scenario Planning Studio — Custom Styles */
+
+/* Smooth transitions for collapsible sections */
+.section-collapsed {
+    display: none;
+}
+
+/* Heatmap color scale */
+.heatmap-1 { background-color: #fee2e2; } /* Very Weak — red-100 */
+.heatmap-2 { background-color: #fed7aa; } /* Weak — orange-200 */
+.heatmap-3 { background-color: #fef08a; } /* Moderate — yellow-200 */
+.heatmap-4 { background-color: #bbf7d0; } /* Strong — green-200 */
+.heatmap-5 { background-color: #86efac; } /* Very Strong — green-300 */
+
+/* Print styles */
+@media print {
+    body { font-size: 12pt; }
+    .no-print { display: none !important; }
+    section { break-inside: avoid; }
+}
+
+/* Assessment grid alternating rows */
+#assessment-body tr:nth-child(even) {
+    background-color: #f9fafb;
+}
+
+/* Drag handle cursor */
+.cursor-move { cursor: grab; }
+.cursor-move:active { cursor: grabbing; }

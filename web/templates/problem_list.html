@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Problems — Scenario Planning Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Nav -->
+    <nav class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+        <h1 class="text-lg font-bold text-gray-900">Scenario Planning Studio</h1>
+        <div class="flex items-center gap-4">
+            {% if user.role == 'admin' %}
+            <a href="/admin/users" class="text-sm text-gray-600 hover:text-blue-600">Admin</a>
+            {% endif %}
+            <span class="text-sm text-gray-500">{{ user.userId[:8] }}…</span>
+            <button id="logout-btn" class="text-sm text-red-600 hover:text-red-800">Logout</button>
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-6 py-8">
+        <div class="flex items-center justify-between mb-8">
+            <h2 class="text-2xl font-bold text-gray-900">My Problems</h2>
+            <div class="flex gap-3">
+                <button id="create-btn"
+                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium">
+                    + New Problem
+                </button>
+                <label class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition text-sm font-medium cursor-pointer">
+                    Upload .SCN
+                    <input type="file" accept=".scn,.SCN" class="hidden" id="upload-input">
+                </label>
+            </div>
+        </div>
+
+        <div id="problems-list" class="space-y-3">
+            {% if problems %}
+                {% for p in problems %}
+                <div class="bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between hover:shadow-md transition">
+                    <div>
+                        <a href="/problems/{{ p.problemId }}/edit"
+                           class="text-lg font-medium text-blue-600 hover:text-blue-800">
+                            {{ p.title or 'Untitled Problem' }}
+                        </a>
+                        <p class="text-sm text-gray-500 mt-1">
+                            Updated {{ p.updatedAt[:10] if p.updatedAt else 'N/A' }}
+                            {% if p.status %}
+                            <span class="ml-2 px-2 py-0.5 rounded text-xs
+                                {% if p.status == 'draft' %}bg-yellow-100 text-yellow-700
+                                {% elif p.status == 'imported' %}bg-purple-100 text-purple-700
+                                {% else %}bg-green-100 text-green-700{% endif %}">
+                                {{ p.status }}
+                            </span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <a href="/problems/{{ p.problemId }}/edit"
+                           class="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition">Edit</a>
+                        <a href="/problems/{{ p.problemId }}/results"
+                           class="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition">Results</a>
+                        <button onclick="downloadProblem('{{ p.problemId }}')"
+                                class="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition">Download</button>
+                        <button onclick="deleteProblem('{{ p.problemId }}')"
+                                class="text-sm text-red-600 hover:text-red-800 px-3 py-1.5 rounded-lg hover:bg-red-50 transition">Delete</button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-16 text-gray-400">
+                    <p class="text-lg">No problems yet</p>
+                    <p class="text-sm mt-2">Create a new problem or upload a .SCN file to get started.</p>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            await fetch('/auth/logout', {method: 'POST'});
+            window.location.href = '/';
+        });
+
+        document.getElementById('create-btn').addEventListener('click', async () => {
+            const res = await fetch('/api/v1/problems', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({title: 'New Problem', description: ''}),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                window.location.href = `/problems/${data.problemId}/edit`;
+            }
+        });
+
+        document.getElementById('upload-input').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('file', file);
+            const res = await fetch('/api/v1/problems/upload', {method: 'POST', body: formData});
+            const data = await res.json();
+            if (res.ok) {
+                window.location.href = `/problems/${data.problemId}/edit`;
+            } else {
+                alert(data.detail || 'Upload failed');
+            }
+        });
+
+        async function downloadProblem(id) {
+            window.location.href = `/api/v1/problems/${id}/download`;
+        }
+
+        async function deleteProblem(id) {
+            if (!confirm('Are you sure you want to delete this problem?')) return;
+            const res = await fetch(`/api/v1/problems/${id}`, {method: 'DELETE'});
+            if (res.ok) window.location.reload();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management — Scenario Planning Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <nav class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <a href="/problems" class="text-gray-500 hover:text-gray-700">&larr; Problems</a>
+            <h1 class="text-lg font-bold text-gray-900">User Management</h1>
+        </div>
+        <button id="logout-btn" class="text-sm text-red-600 hover:text-red-800">Logout</button>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-6 py-8">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">Users</h2>
+            <button id="add-user-btn"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium">
+                + New User
+            </button>
+        </div>
+
+        <!-- Add User Form (hidden by default) -->
+        <div id="add-user-form" class="hidden bg-white rounded-xl border border-gray-200 p-6 mb-6">
+            <h3 class="font-bold text-gray-900 mb-4">Create User</h3>
+            <div class="grid grid-cols-3 gap-4">
+                <input type="text" id="new-username" placeholder="Username"
+                       class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                <input type="password" id="new-password" placeholder="Password (min 8 chars)"
+                       class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                <select id="new-role" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div class="mt-4 flex gap-2">
+                <button id="create-user-submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">Create</button>
+                <button id="create-user-cancel" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-200">Cancel</button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <table class="w-full">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                        <th class="text-left px-4 py-3 text-sm font-medium text-gray-700">Username</th>
+                        <th class="text-left px-4 py-3 text-sm font-medium text-gray-700">Role</th>
+                        <th class="text-left px-4 py-3 text-sm font-medium text-gray-700">Status</th>
+                        <th class="text-left px-4 py-3 text-sm font-medium text-gray-700">Last Login</th>
+                        <th class="text-right px-4 py-3 text-sm font-medium text-gray-700">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr class="border-b border-gray-100">
+                        <td class="px-4 py-3 text-sm font-medium text-gray-800">{{ u.username }}</td>
+                        <td class="px-4 py-3 text-sm">
+                            <span class="px-2 py-0.5 rounded text-xs
+                                {% if u.role == 'admin' %}bg-purple-100 text-purple-700{% else %}bg-gray-100 text-gray-600{% endif %}">
+                                {{ u.role }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-sm">
+                            {% if u.locked %}
+                            <span class="text-red-600">Locked</span>
+                            {% else %}
+                            <span class="text-green-600">Active</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-500">{{ (u.lastLogin[:10] if u.lastLogin else 'Never') }}</td>
+                        <td class="px-4 py-3 text-sm text-right">
+                            <div class="flex gap-2 justify-end">
+                                {% if u.locked %}
+                                <button onclick="unlockUser('{{ u.id }}')"
+                                        class="text-green-600 hover:text-green-800 text-xs px-2 py-1 rounded hover:bg-green-50">Unlock</button>
+                                {% endif %}
+                                <button onclick="resetPassword('{{ u.id }}')"
+                                        class="text-blue-600 hover:text-blue-800 text-xs px-2 py-1 rounded hover:bg-blue-50">Reset PW</button>
+                                <button onclick="deleteUser('{{ u.id }}')"
+                                        class="text-red-600 hover:text-red-800 text-xs px-2 py-1 rounded hover:bg-red-50">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            await fetch('/auth/logout', {method: 'POST'});
+            window.location.href = '/';
+        });
+
+        document.getElementById('add-user-btn').addEventListener('click', () => {
+            document.getElementById('add-user-form').classList.toggle('hidden');
+        });
+        document.getElementById('create-user-cancel').addEventListener('click', () => {
+            document.getElementById('add-user-form').classList.add('hidden');
+        });
+
+        document.getElementById('create-user-submit').addEventListener('click', async () => {
+            const username = document.getElementById('new-username').value.trim();
+            const password = document.getElementById('new-password').value;
+            const role = document.getElementById('new-role').value;
+            if (!username || !password) return alert('Username and password required');
+            const res = await fetch('/api/v1/admin/users', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username, password, role}),
+            });
+            const data = await res.json();
+            if (res.ok) window.location.reload();
+            else alert(data.detail || 'Error creating user');
+        });
+
+        async function unlockUser(id) {
+            const res = await fetch(`/api/v1/admin/users/${id}/unlock`, {method: 'POST'});
+            if (res.ok) window.location.reload();
+        }
+
+        async function resetPassword(id) {
+            const pw = prompt('Enter new password (min 8 characters):');
+            if (!pw) return;
+            const res = await fetch(`/api/v1/admin/users/${id}/reset-password`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({newPassword: pw}),
+            });
+            const data = await res.json();
+            if (res.ok) alert('Password reset successfully');
+            else alert(data.detail || 'Error');
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('Delete this user?')) return;
+            const res = await fetch(`/api/v1/admin/users/${id}`, {method: 'DELETE'});
+            if (res.ok) window.location.reload();
+        }
+    </script>
+</body>
+</html>

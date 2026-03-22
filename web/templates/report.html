@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decision Report — {{ problem.title }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            nav { display: none !important; }
+            body { background: white; }
+            .no-print { display: none !important; }
+        }
+        .page-break { page-break-before: always; }
+    </style>
+</head>
+<body class="bg-white min-h-screen">
+    <nav class="bg-gray-100 px-6 py-3 flex items-center justify-between no-print">
+        <a href="/problems/{{ problem.problemId }}/results" class="text-gray-500 hover:text-gray-700">&larr; Results</a>
+        <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium">
+            Print / Save PDF
+        </button>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-8 py-12">
+        <!-- Title Page -->
+        <div class="text-center mb-16">
+            <h1 class="text-3xl font-bold text-gray-900">Scenario Planning Report</h1>
+            <h2 class="text-xl text-gray-600 mt-4">{{ problem.title }}</h2>
+            <p class="text-gray-500 mt-2">{{ problem.description }}</p>
+            <p class="text-sm text-gray-400 mt-8">Generated {{ problem.updatedAt[:10] if problem.updatedAt else 'N/A' }}</p>
+        </div>
+
+        <!-- Uncertainty Axes -->
+        <section class="mb-12">
+            <h3 class="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-4">Uncertainty Axes</h3>
+            <div class="grid grid-cols-2 gap-6 text-sm">
+                <div>
+                    <h4 class="font-medium text-gray-800">X-Axis: {{ problem.axes.x.label }}</h4>
+                    <ul class="mt-2 space-y-1 text-gray-600">
+                        <li><strong>High:</strong> {{ problem.axes.x.highPole.label }} — {{ problem.axes.x.highPole.description }}</li>
+                        <li><strong>Low:</strong> {{ problem.axes.x.lowPole.label }} — {{ problem.axes.x.lowPole.description }}</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-medium text-gray-800">Y-Axis: {{ problem.axes.y.label }}</h4>
+                    <ul class="mt-2 space-y-1 text-gray-600">
+                        <li><strong>High:</strong> {{ problem.axes.y.highPole.label }} — {{ problem.axes.y.highPole.description }}</li>
+                        <li><strong>Low:</strong> {{ problem.axes.y.lowPole.label }} — {{ problem.axes.y.lowPole.description }}</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scenario Matrix -->
+        <section class="mb-12">
+            <h3 class="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-4">Scenario Matrix</h3>
+            <div class="grid grid-cols-2 gap-4">
+                {% for s in problem.scenarios %}
+                <div class="border rounded-lg p-4
+                    {% if s.xPole == 'high' and s.yPole == 'low' %}bg-blue-50 border-blue-200
+                    {% elif s.xPole == 'high' and s.yPole == 'high' %}bg-amber-50 border-amber-200
+                    {% elif s.xPole == 'low' and s.yPole == 'high' %}bg-red-50 border-red-200
+                    {% else %}bg-green-50 border-green-200{% endif %}">
+                    <h4 class="font-bold text-sm">{{ s.name or s.id }}</h4>
+                    <p class="text-xs text-gray-500 mt-0.5">X: {{ s.xPole }} / Y: {{ s.yPole }}</p>
+                    <p class="text-sm text-gray-700 mt-2">{{ s.narrative }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Strategic Alternatives -->
+        <section class="mb-12">
+            <h3 class="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-4">Strategic Alternatives</h3>
+            <ul class="space-y-2 text-sm">
+                {% for alt in problem.alternatives %}
+                <li>
+                    <strong>{{ alt.id }}. {{ alt.name }}</strong>
+                    {% if alt.description %}<span class="text-gray-500"> — {{ alt.description }}</span>{% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <!-- Participants -->
+        {% if problem.participants %}
+        <section class="mb-12">
+            <h3 class="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-4">Participants</h3>
+            <ul class="text-sm text-gray-700 space-y-1">
+                {% for p in problem.participants %}
+                <li>{{ p.name }} — <span class="text-gray-500">{{ p.status }}</span></li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
+        <!-- Robustness & Heatmap (populated by JS) -->
+        <div class="page-break"></div>
+        <section class="mb-12">
+            <h3 class="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-4">Robustness Ranking & Impact Heatmap</h3>
+            <div id="report-ranking"></div>
+            <div id="report-heatmap" class="mt-6"></div>
+        </section>
+
+        <!-- Consensus -->
+        <section class="mb-12">
+            <h3 class="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-4">Consensus Analysis</h3>
+            <div id="report-consensus"></div>
+        </section>
+
+        <!-- Round History -->
+        <section class="mb-12">
+            <h3 class="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-4">Round History</h3>
+            <ul class="text-sm text-gray-700 space-y-1">
+                {% for r in problem.rounds %}
+                <li>Round {{ r.roundNumber }}: {{ r.status }} (Opened {{ r.openedAt[:10] if r.openedAt else 'N/A' }}{% if r.closedAt %}, Closed {{ r.closedAt[:10] }}{% endif %})</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <!-- AI Narrative -->
+        {% if problem.report and problem.report.narrative %}
+        <section class="mb-12">
+            <h3 class="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-4">Narrative Summary</h3>
+            <div class="prose max-w-none text-gray-700 text-sm leading-relaxed">
+                {{ problem.report.narrative }}
+            </div>
+            <p class="text-xs text-gray-400 mt-4">
+                Generated by {{ problem.report.model }} on {{ problem.report.generatedAt[:10] if problem.report.generatedAt else 'N/A' }}.
+                AI-generated content should be reviewed for accuracy.
+            </p>
+        </section>
+        {% endif %}
+
+        <footer class="text-center text-xs text-gray-400 mt-16 pt-8 border-t border-gray-200">
+            Scenario Planning Studio &copy; 2026 Dr. Jose Mendoza. All rights reserved.
+        </footer>
+    </main>
+
+    <script>
+        const PROBLEM_DATA = {{ problem | tojson }};
+    </script>
+    <script src="/static/js/results.js"></script>
+</body>
+</html>

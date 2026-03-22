@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment — {{ problem.title }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <nav class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <a href="/problems/{{ problem.problemId }}/edit" class="text-gray-500 hover:text-gray-700">&larr; Editor</a>
+            <h1 class="text-lg font-bold text-gray-900">Impact Assessment</h1>
+        </div>
+        <div class="flex items-center gap-3">
+            <span id="progress" class="text-sm text-gray-500"></span>
+            <button id="save-draft-btn" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 text-sm font-medium">
+                Save Draft
+            </button>
+            <button id="submit-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium">
+                Submit
+            </button>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-6 py-8">
+        <!-- Problem Context -->
+        <div class="bg-white rounded-xl border border-gray-200 p-6 mb-8">
+            <h2 class="text-xl font-bold text-gray-900">{{ problem.title }}</h2>
+            <p class="text-gray-600 mt-2">{{ problem.description }}</p>
+            <div class="grid grid-cols-2 gap-4 mt-4 text-sm">
+                <div>
+                    <strong>X-Axis:</strong> {{ problem.axes.x.label }}
+                    <span class="text-gray-500">({{ problem.axes.x.lowPole.label }} – {{ problem.axes.x.highPole.label }})</span>
+                </div>
+                <div>
+                    <strong>Y-Axis:</strong> {{ problem.axes.y.label }}
+                    <span class="text-gray-500">({{ problem.axes.y.lowPole.label }} – {{ problem.axes.y.highPole.label }})</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assessment Grid -->
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <table class="w-full">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                        <th class="text-left px-4 py-3 text-sm font-medium text-gray-700">Alternative</th>
+                        {% for s in problem.scenarios %}
+                        <th class="text-center px-4 py-3 text-sm font-medium text-gray-700">
+                            {{ s.name or s.id }}
+                            <div class="text-xs text-gray-400 font-normal">{{ s.xPole }}/{{ s.yPole }}</div>
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody id="assessment-body">
+                    {% for alt in problem.alternatives %}
+                    <tr class="border-b border-gray-100">
+                        <td class="px-4 py-3">
+                            <div class="font-medium text-sm text-gray-800">{{ alt.id }}. {{ alt.name }}</div>
+                            {% if alt.description %}
+                            <div class="text-xs text-gray-500">{{ alt.description }}</div>
+                            {% endif %}
+                        </td>
+                        {% for s in problem.scenarios %}
+                        <td class="px-4 py-3 text-center">
+                            <select data-cell="{{ alt.id }}_{{ s.id }}" data-field="score"
+                                    class="assessment-cell w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="">—</option>
+                                <option value="1">1 – Very Weak</option>
+                                <option value="2">2 – Weak</option>
+                                <option value="3">3 – Moderate</option>
+                                <option value="4">4 – Strong</option>
+                                <option value="5">5 – Very Strong</option>
+                            </select>
+                            <textarea data-cell="{{ alt.id }}_{{ s.id }}" data-field="rationale"
+                                      rows="2" placeholder="Rationale..."
+                                      class="assessment-cell w-full mt-1 px-2 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-blue-400 outline-none"></textarea>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-4 text-sm text-gray-500">
+            Rating scale: 1 = Very Weak, 2 = Weak, 3 = Moderate, 4 = Strong, 5 = Very Strong
+        </div>
+    </main>
+
+    <script>
+        const PROBLEM_ID = '{{ problem.problemId }}';
+        const PROBLEM_DATA = {{ problem | tojson }};
+    </script>
+    <script src="/static/js/assessment.js"></script>
+</body>
+</html>

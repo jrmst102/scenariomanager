@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results — {{ problem.title }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <nav class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <a href="/problems/{{ problem.problemId }}/edit" class="text-gray-500 hover:text-gray-700">&larr; Editor</a>
+            <h1 class="text-lg font-bold text-gray-900">Results Dashboard</h1>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="/problems/{{ problem.problemId }}/report" target="_blank"
+               class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 text-sm font-medium">
+                📄 Print Report
+            </a>
+            <button id="generate-narrative-btn"
+                    class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 text-sm font-medium">
+                ✨ Generate AI Narrative
+            </button>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-6 py-8 space-y-8">
+        <h2 class="text-2xl font-bold text-gray-900">{{ problem.title }}</h2>
+
+        <!-- Robustness Ranking -->
+        <section class="bg-white rounded-xl border border-gray-200 p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">Robustness Ranking</h3>
+            <div id="ranking-loading" class="text-gray-400 py-8 text-center">Loading analysis...</div>
+            <table id="ranking-table" class="w-full hidden">
+                <thead>
+                    <tr class="border-b border-gray-200">
+                        <th class="text-left px-4 py-2 text-sm font-medium text-gray-700">Rank</th>
+                        <th class="text-left px-4 py-2 text-sm font-medium text-gray-700">Alternative</th>
+                        <th class="text-center px-4 py-2 text-sm font-medium text-gray-700">Mean Score</th>
+                        <th class="text-center px-4 py-2 text-sm font-medium text-gray-700">Fragility</th>
+                        <th class="text-center px-4 py-2 text-sm font-medium text-gray-700" id="scenario-headers"></th>
+                    </tr>
+                </thead>
+                <tbody id="ranking-body"></tbody>
+            </table>
+        </section>
+
+        <!-- Heatmap -->
+        <section class="bg-white rounded-xl border border-gray-200 p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">Impact Heatmap</h3>
+            <div id="heatmap-container"></div>
+        </section>
+
+        <!-- Consensus Panel -->
+        <section class="bg-white rounded-xl border border-gray-200 p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">Consensus Analysis</h3>
+            <div id="consensus-panel">
+                <div class="text-gray-400 py-4">Loading...</div>
+            </div>
+        </section>
+
+        <!-- AI Narrative -->
+        <section class="bg-white rounded-xl border border-gray-200 p-6" id="narrative-section">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">AI Report Narrative</h3>
+            <div id="narrative-content">
+                {% if problem.report and problem.report.narrative %}
+                <div class="prose max-w-none text-gray-700" id="narrative-text">{{ problem.report.narrative }}</div>
+                <div class="text-xs text-gray-400 mt-4">
+                    Generated {{ problem.report.generatedAt }} using {{ problem.report.model }}
+                </div>
+                {% else %}
+                <p class="text-gray-400">No narrative generated yet. Click "Generate AI Narrative" above.</p>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const PROBLEM_ID = '{{ problem.problemId }}';
+        const PROBLEM_DATA = {{ problem | tojson }};
+    </script>
+    <script src="/static/js/results.js"></script>
+</body>
+</html>
