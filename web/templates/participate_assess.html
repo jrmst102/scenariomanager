@@ -118,10 +118,16 @@
         {% endif %}
     </main>
 
+    <script id="server-data" type="application/json">{
+        "problemId": {{ problem.problemId | tojson }},
+        "token": {{ participant.token | tojson }},
+        "roundOpen": {{ round_open | tojson }}
+    }</script>
     <script>
-        const PROBLEM_ID = '{{ problem.problemId }}';
-        const TOKEN = '{{ participant.token }}';
-        const ROUND_OPEN = {{ 'true' if round_open else 'false' }};
+        const _serverData = JSON.parse(document.getElementById('server-data').textContent);
+        const PROBLEM_ID = _serverData.problemId;
+        const TOKEN = _serverData.token;
+        const ROUND_OPEN = _serverData.roundOpen;
 
         function collectCells() {
             const cells = {};

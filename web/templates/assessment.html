@@ -91,9 +91,10 @@
         </div>
     </main>
 
+    <script id="server-data" type="application/json">{{ problem | tojson }}</script>
     <script>
-        const PROBLEM_ID = '{{ problem.problemId }}';
-        const PROBLEM_DATA = {{ problem | tojson }};
+        const PROBLEM_DATA = JSON.parse(document.getElementById('server-data').textContent);
+        const PROBLEM_ID = PROBLEM_DATA.problemId;
     </script>
     <script src="/static/js/assessment.js"></script>
 </body>

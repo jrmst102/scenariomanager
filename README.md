@@ -1,6 +1,6 @@
 # Scenario Planning Studio
 
-A web-based decision support application for structured 2×2 scenario planning analysis. Define two critical uncertainties, construct a scenario matrix, assess how strategic alternatives perform across each future, and generate a robustness ranking — all from a browser.
+**v1.0** — A web-based decision support application for structured 2×2 scenario planning analysis. Define two critical uncertainties, construct a scenario matrix, assess how strategic alternatives perform across each future, and generate a robustness ranking — all from a browser.
 
 Built for the **Competitive Strategy — Decision Tools Module** and designed to deploy on **DigitalOcean App Platform**.
 
@@ -50,7 +50,7 @@ Open `http://localhost:8000` and log in with:
 | `admin` | `admin123` | Admin |
 | `analyst` | `analyst123` | User |
 
-The analyst account includes a sample problem (Vela Skincare — EU Market Entry) with pre-configured axes, scenarios, and alternatives.
+The analyst account includes a sample problem (Vela Skincare — EU Market Entry) with pre-configured axes, scenarios, and alternatives, plus a fully completed sample (Apex Fitness: Platform Growth Strategy) with 5 participants, round-1 assessments, and a generated report narrative.
 
 ## Project Structure
 
@@ -68,9 +68,12 @@ web/
 ├── static/          # CSS and JavaScript
 └── templates/       # Jinja2 HTML templates
 scripts/
-└── provision_demo.py  # Demo data provisioning
+└── provision_demo.py  # Demo data provisioning (also loads docs/*.SCN fixtures)
 tests/
 └── test_compute.py    # Robustness, aggregation, and Kendall's W tests
+docs/
+├── scenario-planning-studio.md  # Full specification
+└── *.SCN                        # Sample problem fixtures (auto-loaded by provisioning)
 ```
 
 ## Environment Variables
@@ -102,6 +105,15 @@ The app is Procfile-ready for DO App Platform:
 ## Documentation
 
 See [docs/scenario-planning-studio.md](docs/scenario-planning-studio.md) for the full specification.
+
+## Sample Data
+
+The provisioning script loads `.SCN` fixture files from `docs/`:
+
+- **Vela Skincare — EU Market Entry** — Draft problem with axes, scenarios, and 5 alternatives (no assessments)
+- **Apex Fitness: Platform Growth Strategy** — Completed problem with 5 participants, full round-1 assessments with rationales, and LLM-generated report narrative
+
+Drop additional `.SCN` files into `docs/` and re-run `python -m scripts.provision_demo` to load them.
 
 ## License
 

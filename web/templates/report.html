@@ -138,8 +138,9 @@
         </footer>
     </main>
 
+    <script id="server-data" type="application/json">{{ problem | tojson }}</script>
     <script>
-        const PROBLEM_DATA = {{ problem | tojson }};
+        const PROBLEM_DATA = JSON.parse(document.getElementById('server-data').textContent);
     </script>
     <script src="/static/js/results.js"></script>
 </body>

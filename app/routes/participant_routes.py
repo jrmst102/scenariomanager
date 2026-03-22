@@ -33,6 +33,7 @@ from app.core.participants import (
 )
 from app.core.problems import get_problem, save_problem
 from app.core.rounds import is_round_open
+from app.storage.store import storage
 
 router = APIRouter()
 
