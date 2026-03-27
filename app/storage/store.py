@@ -138,7 +138,8 @@ class SpacesStorage(StorageBackend):
             resp = self._client.get_object(Bucket=self.bucket, Key=key)
             return json.loads(resp["Body"].read().decode("utf-8"))
         except ClientError as e:
-            if e.response["Error"]["Code"] == "NoSuchKey":
+            code = e.response["Error"]["Code"]
+            if code in ("NoSuchKey", "404", "Not Found"):
                 return None
             raise
 
@@ -178,7 +179,8 @@ class SpacesStorage(StorageBackend):
             resp = self._client.get_object(Bucket=self.bucket, Key=key)
             return resp["Body"].read()
         except ClientError as e:
-            if e.response["Error"]["Code"] == "NoSuchKey":
+            code = e.response["Error"]["Code"]
+            if code in ("NoSuchKey", "404", "Not Found"):
                 return None
             raise
 

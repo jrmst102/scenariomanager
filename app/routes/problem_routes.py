@@ -1,5 +1,6 @@
 """Problem CRUD routes and editor pages."""
 
+import asyncio
 import json
 from pathlib import Path
 
@@ -32,6 +33,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "web" / "templates"))
 
 
+async def _get_problem_with_retry(
+    user_id: str, problem_id: str, retries: int = 3, delay: float = 0.5
+) -> dict | None:
+    """Get problem with retry to handle storage eventual consistency."""
+    for attempt in range(retries):
+        problem = await get_problem(user_id, problem_id)
+        if problem is not None:
+            return problem
+        if attempt < retries - 1:
+            await asyncio.sleep(delay)
+    return None
+
+
 # --- Page Routes ---
 
 @router.get("/problems", response_class=HTMLResponse)
@@ -46,7 +60,7 @@ async def problem_list_page(request: Request, user: dict = Depends(get_current_u
 
 @router.get("/problems/{problem_id}/edit", response_class=HTMLResponse)
 async def problem_editor_page(request: Request, problem_id: str, user: dict = Depends(get_current_user)):
-    problem = await get_problem(user["userId"], problem_id)
+    problem = await _get_problem_with_retry(user["userId"], problem_id)
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found")
     return templates.TemplateResponse("problem_editor.html", {
@@ -58,7 +72,7 @@ async def problem_editor_page(request: Request, problem_id: str, user: dict = De
 
 @router.get("/problems/{problem_id}/assess", response_class=HTMLResponse)
 async def assessment_page(request: Request, problem_id: str, user: dict = Depends(get_current_user)):
-    problem = await get_problem(user["userId"], problem_id)
+    problem = await _get_problem_with_retry(user["userId"], problem_id)
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found")
     return templates.TemplateResponse("assessment.html", {
@@ -70,7 +84,7 @@ async def assessment_page(request: Request, problem_id: str, user: dict = Depend
 
 @router.get("/problems/{problem_id}/results", response_class=HTMLResponse)
 async def results_page(request: Request, problem_id: str, user: dict = Depends(get_current_user)):
-    problem = await get_problem(user["userId"], problem_id)
+    problem = await _get_problem_with_retry(user["userId"], problem_id)
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found")
     return templates.TemplateResponse("results.html", {
@@ -82,7 +96,7 @@ async def results_page(request: Request, problem_id: str, user: dict = Depends(g
 
 @router.get("/problems/{problem_id}/report", response_class=HTMLResponse)
 async def report_page(request: Request, problem_id: str, user: dict = Depends(get_current_user)):
-    problem = await get_problem(user["userId"], problem_id)
+    problem = await _get_problem_with_retry(user["userId"], problem_id)
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found")
     return templates.TemplateResponse("report.html", {
