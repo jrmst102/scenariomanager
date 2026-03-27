@@ -14,6 +14,21 @@ def _problem_key(user_id: str, problem_id: str) -> str:
     return f"users/{user_id}/problems/{problem_id}.SCN"
 
 
+def _problem_lookup_keys(user_id: str, problem_id: str) -> list[str]:
+    """Return storage keys to try when loading/deleting a problem.
+
+    `.SCN` is canonical, but we also support legacy extensions that may
+    exist in production buckets from older versions.
+    """
+    base = f"users/{user_id}/problems/{problem_id}"
+    return [
+        f"{base}.SCN",
+        f"{base}.scn",
+        f"{base}.json",
+        f"{base}.JSON",
+    ]
+
+
 def new_problem_template(title: str = "", description: str = "") -> dict:
     """Return a blank problem with default structure."""
     now = datetime.now(timezone.utc).isoformat()
@@ -102,7 +117,11 @@ async def create_problem(user_id: str, title: str = "", description: str = "") -
 
 async def get_problem(user_id: str, problem_id: str) -> dict | None:
     """Load a problem by ID."""
-    return await storage.read_json(_problem_key(user_id, problem_id))
+    for key in _problem_lookup_keys(user_id, problem_id):
+        problem = await storage.read_json(key)
+        if problem is not None:
+            return problem
+    return None
 
 
 async def save_problem(user_id: str, problem: dict) -> None:
@@ -123,7 +142,9 @@ async def save_problem(user_id: str, problem: dict) -> None:
 
 async def delete_problem(user_id: str, problem_id: str) -> bool:
     """Delete a problem and remove from index."""
-    deleted = await storage.delete(_problem_key(user_id, problem_id))
+    deleted = False
+    for key in _problem_lookup_keys(user_id, problem_id):
+        deleted = await storage.delete(key) or deleted
 
     index = await get_problems_index(user_id)
     index = [p for p in index if p["problemId"] != problem_id]
