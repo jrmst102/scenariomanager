@@ -1,10 +1,21 @@
 """Problem CRUD operations and .SCN file I/O."""
 
+import logging
 import uuid
 from datetime import datetime, timezone
 from typing import Any
 
 from app.storage.store import storage
+
+logger = logging.getLogger(__name__)
+
+# In-memory write-through cache: {"userId:problemId": dict}
+# Ensures a just-created/saved problem is always readable in the same process,
+# even when the storage backend has eventual-consistency delays.
+_problem_cache: dict[str, dict] = {}
+
+def _cache_key(user_id: str, problem_id: str) -> str:
+    return f"{user_id}:{problem_id}"
 
 # Storage key helpers
 def _user_problems_index_key(user_id: str) -> str:
@@ -102,6 +113,10 @@ async def create_problem(user_id: str, title: str = "", description: str = "") -
     # Save the problem file
     await storage.write_json(_problem_key(user_id, problem_id), problem)
 
+    # Cache so the immediate redirect always finds it
+    _problem_cache[_cache_key(user_id, problem_id)] = problem
+    logger.info("Created problem %s for user %s", problem_id, user_id)
+
     # Update the index
     index = await get_problems_index(user_id)
     index.append({
@@ -117,9 +132,16 @@ async def create_problem(user_id: str, title: str = "", description: str = "") -
 
 async def get_problem(user_id: str, problem_id: str) -> dict | None:
     """Load a problem by ID."""
+    # Check in-memory cache first (handles write-then-read consistency)
+    ck = _cache_key(user_id, problem_id)
+    cached = _problem_cache.get(ck)
+    if cached is not None:
+        return cached
+
     for key in _problem_lookup_keys(user_id, problem_id):
         problem = await storage.read_json(key)
         if problem is not None:
+            _problem_cache[ck] = problem
             return problem
     return None
 
@@ -129,6 +151,7 @@ async def save_problem(user_id: str, problem: dict) -> None:
     problem["updatedAt"] = datetime.now(timezone.utc).isoformat()
     problem_id = problem["problemId"]
     await storage.write_json(_problem_key(user_id, problem_id), problem)
+    _problem_cache[_cache_key(user_id, problem_id)] = problem
 
     # Update index entry
     index = await get_problems_index(user_id)
@@ -142,6 +165,7 @@ async def save_problem(user_id: str, problem: dict) -> None:
 
 async def delete_problem(user_id: str, problem_id: str) -> bool:
     """Delete a problem and remove from index."""
+    _problem_cache.pop(_cache_key(user_id, problem_id), None)
     deleted = False
     for key in _problem_lookup_keys(user_id, problem_id):
         deleted = await storage.delete(key) or deleted
