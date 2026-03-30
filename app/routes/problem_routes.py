@@ -2,7 +2,10 @@
 
 import asyncio
 import json
+import logging
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -41,8 +44,16 @@ async def _get_problem_with_retry(
         problem = await get_problem(user_id, problem_id)
         if problem is not None:
             return problem
+        logger.warning(
+            "Problem not found (attempt %d/%d): user=%s problem=%s",
+            attempt + 1, retries, user_id, problem_id,
+        )
         if attempt < retries - 1:
             await asyncio.sleep(delay)
+    logger.error(
+        "Problem not found after %d retries: user=%s problem=%s",
+        retries, user_id, problem_id,
+    )
     return None
 
 
@@ -62,7 +73,9 @@ async def problem_list_page(request: Request, user: dict = Depends(get_current_u
 async def problem_editor_page(request: Request, problem_id: str, user: dict = Depends(get_current_user)):
     problem = await _get_problem_with_retry(user["userId"], problem_id)
     if not problem:
-        raise HTTPException(status_code=404, detail="Problem not found")
+        return templates.TemplateResponse("error.html", {
+            "request": request, "status_code": 404, "message": "Problem not found",
+        }, status_code=404)
     return templates.TemplateResponse("problem_editor.html", {
         "request": request,
         "user": user,
@@ -74,7 +87,9 @@ async def problem_editor_page(request: Request, problem_id: str, user: dict = De
 async def assessment_page(request: Request, problem_id: str, user: dict = Depends(get_current_user)):
     problem = await _get_problem_with_retry(user["userId"], problem_id)
     if not problem:
-        raise HTTPException(status_code=404, detail="Problem not found")
+        return templates.TemplateResponse("error.html", {
+            "request": request, "status_code": 404, "message": "Problem not found",
+        }, status_code=404)
     return templates.TemplateResponse("assessment.html", {
         "request": request,
         "user": user,
@@ -86,7 +101,9 @@ async def assessment_page(request: Request, problem_id: str, user: dict = Depend
 async def results_page(request: Request, problem_id: str, user: dict = Depends(get_current_user)):
     problem = await _get_problem_with_retry(user["userId"], problem_id)
     if not problem:
-        raise HTTPException(status_code=404, detail="Problem not found")
+        return templates.TemplateResponse("error.html", {
+            "request": request, "status_code": 404, "message": "Problem not found",
+        }, status_code=404)
     return templates.TemplateResponse("results.html", {
         "request": request,
         "user": user,
@@ -98,7 +115,9 @@ async def results_page(request: Request, problem_id: str, user: dict = Depends(g
 async def report_page(request: Request, problem_id: str, user: dict = Depends(get_current_user)):
     problem = await _get_problem_with_retry(user["userId"], problem_id)
     if not problem:
-        raise HTTPException(status_code=404, detail="Problem not found")
+        return templates.TemplateResponse("error.html", {
+            "request": request, "status_code": 404, "message": "Problem not found",
+        }, status_code=404)
     return templates.TemplateResponse("report.html", {
         "request": request,
         "user": user,

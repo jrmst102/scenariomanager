@@ -138,11 +138,13 @@ async def get_problem(user_id: str, problem_id: str) -> dict | None:
     if cached is not None:
         return cached
 
-    for key in _problem_lookup_keys(user_id, problem_id):
+    keys = _problem_lookup_keys(user_id, problem_id)
+    for key in keys:
         problem = await storage.read_json(key)
         if problem is not None:
             _problem_cache[ck] = problem
             return problem
+    logger.warning("Problem not in cache or storage: user=%s problem=%s keys=%s", user_id, problem_id, keys)
     return None
 
 
@@ -153,13 +155,23 @@ async def save_problem(user_id: str, problem: dict) -> None:
     await storage.write_json(_problem_key(user_id, problem_id), problem)
     _problem_cache[_cache_key(user_id, problem_id)] = problem
 
-    # Update index entry
+    # Update index entry (add if missing — handles eventual-consistency cases
+    # where a stale index was read without the newly imported entry)
     index = await get_problems_index(user_id)
+    found = False
     for entry in index:
         if entry["problemId"] == problem_id:
             entry["title"] = problem.get("title", "")
             entry["updatedAt"] = problem["updatedAt"]
+            found = True
             break
+    if not found:
+        index.append({
+            "problemId": problem_id,
+            "title": problem.get("title", ""),
+            "updatedAt": problem["updatedAt"],
+            "status": "draft",
+        })
     await save_problems_index(user_id, index)
 
 

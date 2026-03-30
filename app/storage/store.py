@@ -141,6 +141,7 @@ class SpacesStorage(StorageBackend):
             code = e.response["Error"]["Code"]
             if code in ("NoSuchKey", "404", "Not Found"):
                 return None
+            logger.error("Spaces read_json error for key=%s: %s", key, e)
             raise
 
     async def write_json(self, key: str, data: Any) -> None:
