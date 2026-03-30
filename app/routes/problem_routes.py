@@ -44,11 +44,11 @@ async def _get_problem_with_retry(
         problem = await get_problem(user_id, problem_id)
         if problem is not None:
             return problem
-        logger.warning(
-            "Problem not found (attempt %d/%d): user=%s problem=%s",
-            attempt + 1, retries, user_id, problem_id,
-        )
         if attempt < retries - 1:
+            logger.warning(
+                "Problem not found (attempt %d/%d): user=%s problem=%s",
+                attempt + 1, retries, user_id, problem_id,
+            )
             await asyncio.sleep(delay)
     logger.error(
         "Problem not found after %d retries: user=%s problem=%s",

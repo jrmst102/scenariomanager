@@ -138,13 +138,20 @@ async def get_problem(user_id: str, problem_id: str) -> dict | None:
     if cached is not None:
         return cached
 
-    keys = _problem_lookup_keys(user_id, problem_id)
-    for key in keys:
+    # Try canonical key first (vast majority of problems)
+    primary_key = _problem_key(user_id, problem_id)
+    problem = await storage.read_json(primary_key)
+    if problem is not None:
+        _problem_cache[ck] = problem
+        return problem
+
+    # Fall back to legacy extensions only if canonical key missed
+    for key in _problem_lookup_keys(user_id, problem_id)[1:]:
         problem = await storage.read_json(key)
         if problem is not None:
             _problem_cache[ck] = problem
             return problem
-    logger.warning("Problem not in cache or storage: user=%s problem=%s keys=%s", user_id, problem_id, keys)
+    logger.warning("Problem not in cache or storage: user=%s problem=%s", user_id, problem_id)
     return None
 
 

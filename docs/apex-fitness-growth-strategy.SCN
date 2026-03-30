@@ -35,7 +35,7 @@
       "name": "Golden Age",
       "xPole": "high",
       "yPole": "low",
-      "narrative": "At-home fitness becomes the dominant modality and big tech stays on the sidelines. Apex operates in a growing market without existential competitive pressure. Subscribers value premium content and specialized hardware. This is the best-case scenario for the current business model — the question is how to maximize the opportunity."
+      "narrative": "At-home fitness becomes the dominant modality and big tech stays on the sidelines. Apex operates in a growing market without existential competitive pressure. Subscribers value premium content and specialized hardware. This is the best-case scenario for the current business model \u2014 the question is how to maximize the opportunity."
     },
     {
       "id": "Q2",
@@ -49,7 +49,7 @@
       "name": "Perfect Storm",
       "xPole": "low",
       "yPole": "high",
-      "narrative": "Consumers return to gyms and studios while big tech simultaneously enters connected fitness. Apex faces shrinking demand and overwhelming competition. Hardware sales collapse. The subscription base erodes from both sides. This is the existential threat scenario — only the most defensible strategy survives."
+      "narrative": "Consumers return to gyms and studios while big tech simultaneously enters connected fitness. Apex faces shrinking demand and overwhelming competition. Hardware sales collapse. The subscription base erodes from both sides. This is the existential threat scenario \u2014 only the most defensible strategy survives."
     },
     {
       "id": "Q4",
@@ -68,12 +68,12 @@
     {
       "id": "B",
       "name": "Launch B2B Corporate Wellness Platform",
-      "description": "Invest $40M to build a corporate wellness offering — employer-subsidized subscriptions, office gym integrations, wellness analytics dashboards for HR, and group challenges. Target the $80B corporate wellness market. Diversifies revenue away from consumer discretionary spending."
+      "description": "Invest $40M to build a corporate wellness offering \u2014 employer-subsidized subscriptions, office gym integrations, wellness analytics dashboards for HR, and group challenges. Target the $80B corporate wellness market. Diversifies revenue away from consumer discretionary spending."
     },
     {
       "id": "C",
       "name": "Acquire Boutique Studio Chain",
-      "description": "Invest $40M to acquire a mid-size boutique fitness studio chain (e.g., 40–60 locations) and create a hybrid model: in-studio classes streamed to at-home subscribers, studio members get free app access, unified membership across physical and digital. Hedges against the return-to-gym trend."
+      "description": "Invest $40M to acquire a mid-size boutique fitness studio chain (e.g., 40\u201360 locations) and create a hybrid model: in-studio classes streamed to at-home subscribers, studio members get free app access, unified membership across physical and digital. Hedges against the return-to-gym trend."
     },
     {
       "id": "D",
@@ -93,38 +93,6 @@
       "pinHash": "$2b$12$LJ3m5Fz8k9x2v1w4y6u8iOqR3t5s7p9n1m3k5j7h9f1d3a5b7c9e",
       "status": "submitted",
       "addedAt": "2026-03-18T09:30:00Z"
-    },
-    {
-      "id": "p1a2b3c4-2222-4d5e-a6f7-b8c9d0e1f2a3",
-      "name": "Priya Shankar",
-      "token": "t1a2b3c4-2222-4d5e-a6f7-b8c9d0e1f2a3",
-      "pinHash": "$2b$12$KM4n6G0A1B2c3D4e5F6g7HpS4u6t8r0q2o4m6l8j0h2f4d6b8a0c",
-      "status": "submitted",
-      "addedAt": "2026-03-18T09:31:00Z"
-    },
-    {
-      "id": "p1a2b3c4-3333-4d5e-a6f7-b8c9d0e1f2a3",
-      "name": "David Okafor",
-      "token": "t1a2b3c4-3333-4d5e-a6f7-b8c9d0e1f2a3",
-      "pinHash": "$2b$12$NP5o7H1B2C3d4E5f6G7h8IqT5v7u9s1r3p5n7l9k1i3g5e7c9a1b",
-      "status": "submitted",
-      "addedAt": "2026-03-18T09:32:00Z"
-    },
-    {
-      "id": "p1a2b3c4-4444-4d5e-a6f7-b8c9d0e1f2a3",
-      "name": "Elena Vasquez",
-      "token": "t1a2b3c4-4444-4d5e-a6f7-b8c9d0e1f2a3",
-      "pinHash": "$2b$12$OQ6p8I2C3D4e5F6g7H8i9JrU6w8v0t2s4q6o8m0l2j4h6f8d0b2c",
-      "status": "submitted",
-      "addedAt": "2026-03-18T09:33:00Z"
-    },
-    {
-      "id": "p1a2b3c4-5555-4d5e-a6f7-b8c9d0e1f2a3",
-      "name": "James Whitfield",
-      "token": "t1a2b3c4-5555-4d5e-a6f7-b8c9d0e1f2a3",
-      "pinHash": "$2b$12$PR7q9J3D4E5f6G7h8I9j0KsV7x9w1u3t5r7p9n1m3k5i7g9e1c3d",
-      "status": "submitted",
-      "addedAt": "2026-03-18T09:34:00Z"
     }
   ],
   "rounds": [
@@ -139,99 +107,75 @@
   "assessments": {
     "round_1": {
       "p1a2b3c4-1111-4d5e-a6f7-b8c9d0e1f2a3": {
-        "A_Q1": { "score": 5, "rationale": "Best-case world for a content-first strategy. Growing at-home market with no tech giant pressure means premium content commands premium pricing. Community features create switching costs." },
-        "A_Q2": { "score": 3, "rationale": "Content is strong but big tech can outspend on production. Apple could sign exclusive instructors. The community moat helps but may not be enough against subsidized competition." },
-        "A_Q3": { "score": 1, "rationale": "Worst case. Shrinking at-home demand plus big tech competition. Content investment has high fixed costs that don't scale down. Subscriber losses make the unit economics collapse." },
-        "A_Q4": { "score": 3, "rationale": "Smaller but loyal audience values premium content. Without big tech pressure, Apex can sustain pricing. But the ceiling is low — you're investing $40M for a niche." },
-        "B_Q1": { "score": 3, "rationale": "Corporate wellness works in any fitness modality, but the at-home tailwind helps. Employers see value in subsidizing home fitness. However, this diverts focus from the consumer opportunity in a golden-age market." },
-        "B_Q2": { "score": 4, "rationale": "Corporate contracts provide revenue stability that consumer subscriptions can't match when big tech is compressing prices. Employers are less price-sensitive than individual consumers." },
-        "B_Q3": { "score": 3, "rationale": "Corporate wellness is partially insulated from consumer preference shifts — employers still want wellness programs regardless of where employees exercise. But the at-home hardware component loses relevance." },
-        "B_Q4": { "score": 3, "rationale": "Steady but unspectacular. Corporate wellness doesn't depend heavily on either axis. It's a diversification play that performs consistently but never dominates." },
-        "C_Q1": { "score": 2, "rationale": "Acquiring studios when at-home is winning means paying for declining assets. The hybrid model sounds good in theory but splits focus. The $40M is better spent on the winning modality." },
-        "C_Q2": { "score": 2, "rationale": "Studios don't help against big tech in the at-home space. You've bought a hedge you don't need and now face tech giants in your core market without the full $40M to fight back." },
-        "C_Q3": { "score": 4, "rationale": "The one scenario where studios are the right bet. Consumers return to in-person, and you own physical locations. The hybrid model captures both the returning gym-goer and the remaining at-home segment." },
-        "C_Q4": { "score": 4, "rationale": "Studios serve the in-person preference. Without big tech pressure, the hybrid model can differentiate. Physical presence creates local brand loyalty that pure-digital players lack." },
-        "D_Q1": { "score": 4, "rationale": "AI coaching adds a defensible technology layer on top of the content advantage. In a growing at-home market, personalization becomes the premium differentiator." },
-        "D_Q2": { "score": 5, "rationale": "This is the big-tech defense play. Apple can bundle content cheaply, but replicating a sophisticated AI coaching platform takes years. This is the moat — proprietary technology that can't be commoditized." },
-        "D_Q3": { "score": 2, "rationale": "AI coaching is compelling but it's built for at-home use. If consumers go back to gyms, the technology loses its primary application. You've built a moat around a shrinking castle." },
-        "D_Q4": { "score": 3, "rationale": "AI coaching serves the committed at-home segment well, but the market is small. The technology investment may be overbuilt for a niche audience." }
-      },
-      "p1a2b3c4-2222-4d5e-a6f7-b8c9d0e1f2a3": {
-        "A_Q1": { "score": 5, "rationale": "Content and community are exactly right for this world. No reason to diversify when the core business is thriving. Invest in what's working." },
-        "A_Q2": { "score": 2, "rationale": "Apple TV taught us that big tech can buy top-tier content talent. Apex can't win a spending war on production value. Community helps but it's not enough." },
-        "A_Q3": { "score": 1, "rationale": "Fatal combination. Investing more in content for a shrinking, hyper-competitive market. Classic sunk cost trap." },
-        "A_Q4": { "score": 4, "rationale": "Premium content serves the enthusiast niche well. Loyal users will pay for quality. The smaller market actually favors Apex over generalist competitors." },
-        "B_Q1": { "score": 2, "rationale": "Why go B2B in the best consumer market? Corporate sales cycles are 6–12 months. You'd be leaving money on the table in the consumer space." },
-        "B_Q2": { "score": 4, "rationale": "Corporate contracts are the smart play when consumer acquisition gets expensive. B2B customer acquisition costs are high upfront but the lifetime value is much higher." },
-        "B_Q3": { "score": 4, "rationale": "Corporate wellness persists regardless of where people exercise. Employers want healthy employees whether that means gym memberships or at-home subscriptions. This is the most resilient play." },
-        "B_Q4": { "score": 3, "rationale": "Solid diversification. Not exciting, but stable. Corporate budgets don't swing with consumer fitness trends." },
-        "C_Q1": { "score": 1, "rationale": "Buying studios at the peak of at-home fitness is buying high. The acquisition would be a drag on growth when the core business is accelerating." },
-        "C_Q2": { "score": 2, "rationale": "Studios don't solve the big tech problem. You've diversified into a different business instead of defending the one under attack." },
-        "C_Q3": { "score": 5, "rationale": "This is the only strategy that directly addresses both threats. Physical locations serve the gym-returning consumer, and the hybrid model leverages existing digital infrastructure." },
-        "C_Q4": { "score": 5, "rationale": "In-person preference plus manageable competition. Studios give Apex a physical moat. The hybrid membership creates a unique offering no pure-digital or pure-physical competitor can match." },
-        "D_Q1": { "score": 4, "rationale": "AI personalization is the next frontier for at-home fitness. First-mover advantage in a growing market is powerful." },
-        "D_Q2": { "score": 4, "rationale": "Technology moat is the right defense against big tech. But Apple has far more AI engineering talent — can Apex really out-innovate them?" },
-        "D_Q3": { "score": 2, "rationale": "Sophisticated AI for a shrinking at-home audience. The technology is impressive but the addressable market doesn't justify the investment." },
-        "D_Q4": { "score": 3, "rationale": "Overengineered for a niche market. The enthusiast segment would benefit, but $40M in AI for a small audience is hard to justify." }
-      },
-      "p1a2b3c4-3333-4d5e-a6f7-b8c9d0e1f2a3": {
-        "A_Q1": { "score": 4, "rationale": "Content is the right play but the $40M could include more innovation. Pure content is table stakes even in a friendly market." },
-        "A_Q2": { "score": 2, "rationale": "Outgunned on content budgets. Netflix spent $17B on content and still struggles against Disney+. Apex can't win on content volume against big tech." },
-        "A_Q3": { "score": 2, "rationale": "Content doesn't fix a demand problem. If people aren't working out at home, better content won't change their mind." },
-        "A_Q4": { "score": 3, "rationale": "Adequate for a niche. Loyal users appreciate content quality. But growth is capped." },
-        "B_Q1": { "score": 3, "rationale": "Reasonable diversification even in the best case. Corporate wellness adds a stable revenue layer. But the opportunity cost in a booming consumer market is real." },
-        "B_Q2": { "score": 5, "rationale": "The most defensible revenue stream when consumer markets get cutthroat. Enterprise contracts with annual commitments provide the stability to weather a platform war." },
-        "B_Q3": { "score": 4, "rationale": "Corporate wellness is the safe harbor. Employers want wellness programs regardless of fitness modality trends. B2B insulates from both axes." },
-        "B_Q4": { "score": 4, "rationale": "Consistent performer. Not dependent on at-home vs. gym or big tech dynamics. The $80B corporate wellness market has room for a premium connected fitness player." },
-        "C_Q1": { "score": 2, "rationale": "Counterproductive. Acquiring declining assets in an at-home dominant world. The hybrid thesis assumes both modalities matter — in this world, only one does." },
-        "C_Q2": { "score": 1, "rationale": "The worst allocation of capital. Studios don't defend against big tech, and you've split your investment across two modalities when you need all resources focused on one." },
-        "C_Q3": { "score": 4, "rationale": "Strong hedge but execution risk is enormous. Integrating a physical studio chain while your core digital business is under pressure requires management bandwidth Apex may not have." },
-        "C_Q4": { "score": 3, "rationale": "Studios help but the acquisition premium may not be justified when big tech isn't forcing urgency. Organic partnerships with studios could achieve similar results for less." },
-        "D_Q1": { "score": 5, "rationale": "AI coaching in a growing at-home market with no big tech pressure is the dream scenario. Build the technology moat while you have the runway. This is the time to invest in R&D." },
-        "D_Q2": { "score": 4, "rationale": "The right strategic direction — technology differentiation against big tech. Execution risk is real but it's the only play that creates a sustainable competitive advantage." },
-        "D_Q3": { "score": 2, "rationale": "Brilliant technology, wrong market. AI coaching for at-home fitness in a world going back to gyms. Could pivot to B2B gym technology, but that's not the original thesis." },
-        "D_Q4": { "score": 3, "rationale": "Overinvestment for the market size, but the technology itself is valuable. Could license to other platforms or gyms." }
-      },
-      "p1a2b3c4-4444-4d5e-a6f7-b8c9d0e1f2a3": {
-        "A_Q1": { "score": 5, "rationale": "Lean into strength. Content and community are the moat when the market is favorable. Celebrity instructors and gamification increase retention." },
-        "A_Q2": { "score": 3, "rationale": "Community is harder to replicate than content. The social features — group rides, leaderboards, friendships — create real switching costs. But content alone won't survive big tech." },
-        "A_Q3": { "score": 1, "rationale": "No path to success. Content investment accelerates losses in a shrinking, competitive market." },
-        "A_Q4": { "score": 3, "rationale": "Serves the faithful well. The niche values quality content. Sustainable but small." },
-        "B_Q1": { "score": 3, "rationale": "Solid but misses the bigger consumer opportunity. B2B is the right long-term diversification but wrong timing in a booming consumer market." },
-        "B_Q2": { "score": 4, "rationale": "Enterprise revenue is the ballast you need in choppy consumer waters. Smart defensive move." },
-        "B_Q3": { "score": 3, "rationale": "Helpful but doesn't fully solve the problem. Corporate wellness contracts help revenue but Apex still needs a viable consumer product to sell to those corporate users." },
-        "B_Q4": { "score": 3, "rationale": "Steady performer. Neither axis matters much to the B2B thesis. That's the strength and the limitation." },
-        "C_Q1": { "score": 2, "rationale": "Wrong bet in the right market. If at-home is winning, studios are a distraction." },
-        "C_Q2": { "score": 2, "rationale": "Studios don't address the core threat. You need to compete digitally against big tech, not diversify into physical assets." },
-        "C_Q3": { "score": 5, "rationale": "Exactly right. Own the physical + digital bridge. The hybrid membership is a unique proposition that neither pure gyms nor pure digital players offer." },
-        "C_Q4": { "score": 4, "rationale": "Studios serve the returning gym-goer, and the hybrid model creates differentiation. Physical presence builds local communities." },
-        "D_Q1": { "score": 4, "rationale": "Strong technology play in a favorable market. AI personalization becomes the premium tier that justifies higher subscription pricing." },
-        "D_Q2": { "score": 5, "rationale": "The only strategy that directly counters big tech's advantages. Apple can bundle, but Apex can out-specialize. Deep AI fitness expertise is a genuine moat." },
-        "D_Q3": { "score": 3, "rationale": "AI coaching could adapt to in-gym use — wearable-based form correction, rep counting, program adaptation. The technology is modality-agnostic if positioned correctly." },
-        "D_Q4": { "score": 3, "rationale": "Good technology for a limited market. The AI platform could become licensable IP even if the direct consumer market is small." }
-      },
-      "p1a2b3c4-5555-4d5e-a6f7-b8c9d0e1f2a3": {
-        "A_Q1": { "score": 4, "rationale": "Content works here, but Apex should also invest in retention technology. Content alone is commoditizable over time even without big tech pressure." },
-        "A_Q2": { "score": 2, "rationale": "Peloton proved that great content alone doesn't survive a changing competitive landscape. Big tech will offer 'good enough' content bundled with everything else." },
-        "A_Q3": { "score": 2, "rationale": "Content is the wrong answer when the question is 'why work out at home?' You can't content-marketing your way out of a demand shift." },
-        "A_Q4": { "score": 3, "rationale": "Reliable for the niche. Not exciting, but stable." },
-        "B_Q1": { "score": 4, "rationale": "Contrarian view: even in the best consumer market, B2B diversification builds long-term resilience. Consumer fitness trends are cyclical; corporate wellness budgets are not." },
-        "B_Q2": { "score": 5, "rationale": "The highest-conviction play in this scenario. When consumer markets get ugly, enterprise contracts keep the lights on. Peloton's collapse was a consumer demand story — B2B could have saved them." },
-        "B_Q3": { "score": 4, "rationale": "Corporate wellness insulates from consumer demand shifts. The product would evolve — less hardware, more software and wellness analytics — but the revenue stream persists." },
-        "B_Q4": { "score": 4, "rationale": "Strong, consistent performer across scenarios. The $80B corporate wellness market is large enough to build a meaningful business regardless of consumer fitness trends." },
-        "C_Q1": { "score": 1, "rationale": "Capital destruction. Buying physical assets at the peak of digital dominance. Every dollar in studios is a dollar not invested in the winning modality." },
-        "C_Q2": { "score": 2, "rationale": "Doesn't solve the problem and creates new ones. Managing 50 studio leases while fighting Apple for digital subscribers is a recipe for management distraction." },
-        "C_Q3": { "score": 4, "rationale": "The right strategic response to the gym-return trend. Owning the omnichannel fitness experience gives Apex a unique positioning. But integration risk is high." },
-        "C_Q4": { "score": 4, "rationale": "Good fit. In-person demand plus low competition means studios generate solid returns. The hybrid angle differentiates from pure-play studios." },
-        "D_Q1": { "score": 5, "rationale": "Invest in technology while you have the cash flow to fund it. AI personalization is the next platform shift in fitness — owning it early is worth the risk." },
-        "D_Q2": { "score": 4, "rationale": "Technology moats are the only moats that hold against big tech. Content, brand, community — tech giants can replicate all of those. Deep vertical AI is harder." },
-        "D_Q3": { "score": 2, "rationale": "At-home AI coaching in a gym-return world. The technology is valuable but the primary use case evaporates. Would need to pivot to gym-based AI or licensing." },
-        "D_Q4": { "score": 4, "rationale": "Premium AI coaching for a dedicated enthusiast segment. Small market, but these users have high willingness to pay and low churn. The economics could work." }
+        "A_Q1": {
+          "score": 5,
+          "rationale": "Best-case world for a content-first strategy. Growing at-home market with no tech giant pressure means premium content commands premium pricing. Community features create switching costs."
+        },
+        "A_Q2": {
+          "score": 3,
+          "rationale": "Content is strong but big tech can outspend on production. Apple could sign exclusive instructors. The community moat helps but may not be enough against subsidized competition."
+        },
+        "A_Q3": {
+          "score": 1,
+          "rationale": "Worst case. Shrinking at-home demand plus big tech competition. Content investment has high fixed costs that don't scale down. Subscriber losses make the unit economics collapse."
+        },
+        "A_Q4": {
+          "score": 3,
+          "rationale": "Smaller but loyal audience values premium content. Without big tech pressure, Apex can sustain pricing. But the ceiling is low \u2014 you're investing $40M for a niche."
+        },
+        "B_Q1": {
+          "score": 3,
+          "rationale": "Corporate wellness works in any fitness modality, but the at-home tailwind helps. Employers see value in subsidizing home fitness. However, this diverts focus from the consumer opportunity in a golden-age market."
+        },
+        "B_Q2": {
+          "score": 4,
+          "rationale": "Corporate contracts provide revenue stability that consumer subscriptions can't match when big tech is compressing prices. Employers are less price-sensitive than individual consumers."
+        },
+        "B_Q3": {
+          "score": 3,
+          "rationale": "Corporate wellness is partially insulated from consumer preference shifts \u2014 employers still want wellness programs regardless of where employees exercise. But the at-home hardware component loses relevance."
+        },
+        "B_Q4": {
+          "score": 3,
+          "rationale": "Steady but unspectacular. Corporate wellness doesn't depend heavily on either axis. It's a diversification play that performs consistently but never dominates."
+        },
+        "C_Q1": {
+          "score": 2,
+          "rationale": "Acquiring studios when at-home is winning means paying for declining assets. The hybrid model sounds good in theory but splits focus. The $40M is better spent on the winning modality."
+        },
+        "C_Q2": {
+          "score": 2,
+          "rationale": "Studios don't help against big tech in the at-home space. You've bought a hedge you don't need and now face tech giants in your core market without the full $40M to fight back."
+        },
+        "C_Q3": {
+          "score": 4,
+          "rationale": "The one scenario where studios are the right bet. Consumers return to in-person, and you own physical locations. The hybrid model captures both the returning gym-goer and the remaining at-home segment."
+        },
+        "C_Q4": {
+          "score": 4,
+          "rationale": "Studios serve the in-person preference. Without big tech pressure, the hybrid model can differentiate. Physical presence creates local brand loyalty that pure-digital players lack."
+        },
+        "D_Q1": {
+          "score": 4,
+          "rationale": "AI coaching adds a defensible technology layer on top of the content advantage. In a growing at-home market, personalization becomes the premium differentiator."
+        },
+        "D_Q2": {
+          "score": 5,
+          "rationale": "This is the big-tech defense play. Apple can bundle content cheaply, but replicating a sophisticated AI coaching platform takes years. This is the moat \u2014 proprietary technology that can't be commoditized."
+        },
+        "D_Q3": {
+          "score": 2,
+          "rationale": "AI coaching is compelling but it's built for at-home use. If consumers go back to gyms, the technology loses its primary application. You've built a moat around a shrinking castle."
+        },
+        "D_Q4": {
+          "score": 3,
+          "rationale": "AI coaching serves the committed at-home segment well, but the market is small. The technology investment may be overbuilt for a niche audience."
+        }
       }
     }
   },
   "report": {
-    "narrative": "The group's scenario analysis reveals a clear strategic picture: no single option dominates all four futures, but Option B (Corporate Wellness Platform) and Option D (AI Personal Training) emerge as the most robust strategies, each for different reasons.\n\nOption B is the group's consensus pick for robustness. With a median score of 4.0 and the lowest fragility index of the four options, the corporate wellness strategy performs consistently across all scenarios because its success is largely independent of both driving uncertainties. Whether consumers prefer at-home or in-person fitness, and whether big tech enters aggressively or not, employers still want wellness programs. The group sees B2B revenue as 'ballast' — it won't produce the highest highs, but it prevents the devastating lows that threaten the other strategies.\n\nOption D ranks a close second in robustness with particular strength in the two at-home-dominant scenarios. The group views AI as the only defensible moat against big tech — content, brand, and even community can be replicated by well-funded competitors, but deep vertical AI expertise in fitness takes years to build. The vulnerability is clear: if consumers return to gyms, the AI platform's primary use case weakens, though several participants noted the technology could be repositioned for in-gym applications or licensed to studios.\n\nOption A (Content & Community) is highly polarized — the group's strongest performer in the 'Golden Age' scenario (median 5.0) but its weakest in 'Perfect Storm' (median 1.0). This fragility makes it a dangerous primary bet; it only wins in the one specific future where at-home fitness thrives without big tech competition.\n\nOption C (Studio Acquisition) shows the opposite pattern — it thrives when consumers return to gyms but is the worst allocation of capital if at-home fitness dominates. The group views it as an insurance policy, not a growth strategy.\n\nThe key strategic insight: a $40M allocation split between Option B ($24M) and Option D ($16M) would create both defensive resilience through corporate wellness and offensive differentiation through AI technology, while maintaining acceptable performance across all four scenarios. This combined approach sacrifices upside in the 'Golden Age' scenario but dramatically reduces downside exposure in the three less favorable futures.",
+    "narrative": "The group's scenario analysis reveals a clear strategic picture: no single option dominates all four futures, but Option B (Corporate Wellness Platform) and Option D (AI Personal Training) emerge as the most robust strategies, each for different reasons.\n\nOption B is the group's consensus pick for robustness. With a median score of 4.0 and the lowest fragility index of the four options, the corporate wellness strategy performs consistently across all scenarios because its success is largely independent of both driving uncertainties. Whether consumers prefer at-home or in-person fitness, and whether big tech enters aggressively or not, employers still want wellness programs. The group sees B2B revenue as 'ballast' \u2014 it won't produce the highest highs, but it prevents the devastating lows that threaten the other strategies.\n\nOption D ranks a close second in robustness with particular strength in the two at-home-dominant scenarios. The group views AI as the only defensible moat against big tech \u2014 content, brand, and even community can be replicated by well-funded competitors, but deep vertical AI expertise in fitness takes years to build. The vulnerability is clear: if consumers return to gyms, the AI platform's primary use case weakens, though several participants noted the technology could be repositioned for in-gym applications or licensed to studios.\n\nOption A (Content & Community) is highly polarized \u2014 the group's strongest performer in the 'Golden Age' scenario (median 5.0) but its weakest in 'Perfect Storm' (median 1.0). This fragility makes it a dangerous primary bet; it only wins in the one specific future where at-home fitness thrives without big tech competition.\n\nOption C (Studio Acquisition) shows the opposite pattern \u2014 it thrives when consumers return to gyms but is the worst allocation of capital if at-home fitness dominates. The group views it as an insurance policy, not a growth strategy.\n\nThe key strategic insight: a $40M allocation split between Option B ($24M) and Option D ($16M) would create both defensive resilience through corporate wellness and offensive differentiation through AI technology, while maintaining acceptable performance across all four scenarios. This combined approach sacrifices upside in the 'Golden Age' scenario but dramatically reduces downside exposure in the three less favorable futures.",
     "generatedAt": "2026-03-21T14:42:00Z",
     "model": "gpt-4o-mini"
   }

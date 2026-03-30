@@ -3,9 +3,12 @@
 All paths are relative keys like 'data/users.json' or 'users/{uid}/problems/{pid}.SCN'.
 """
 
+import asyncio
 import json
 import logging
 import os
+import time
+from functools import partial
 from pathlib import Path
 from typing import Any
 
@@ -114,7 +117,11 @@ class LocalStorage(StorageBackend):
 
 
 class SpacesStorage(StorageBackend):
-    """DigitalOcean Spaces (S3-compatible) storage for production."""
+    """DigitalOcean Spaces (S3-compatible) storage for production.
+
+    All boto3 calls run in a thread pool to avoid blocking the async event loop.
+    Writes are verified with a read-back to handle eventual consistency.
+    """
 
     def __init__(self):
         self._client = None
@@ -133,10 +140,30 @@ class SpacesStorage(StorageBackend):
     def bucket(self):
         return settings.SPACES_BUCKET
 
+    async def _run_sync(self, func, *args, **kwargs):
+        """Run a synchronous boto3 call in the default thread pool."""
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, partial(func, *args, **kwargs))
+
+    def _get_object_sync(self, key: str):
+        return self._client.get_object(Bucket=self.bucket, Key=key)
+
+    def _put_object_sync(self, key: str, body: bytes, content_type: str):
+        return self._client.put_object(
+            Bucket=self.bucket, Key=key, Body=body, ContentType=content_type,
+        )
+
+    def _head_object_sync(self, key: str):
+        return self._client.head_object(Bucket=self.bucket, Key=key)
+
+    def _delete_object_sync(self, key: str):
+        return self._client.delete_object(Bucket=self.bucket, Key=key)
+
     async def read_json(self, key: str) -> Any | None:
         try:
-            resp = self._client.get_object(Bucket=self.bucket, Key=key)
-            return json.loads(resp["Body"].read().decode("utf-8"))
+            resp = await self._run_sync(self._get_object_sync, key)
+            body = resp["Body"].read()
+            return json.loads(body.decode("utf-8"))
         except ClientError as e:
             code = e.response["Error"]["Code"]
             if code in ("NoSuchKey", "404", "Not Found"):
@@ -146,38 +173,46 @@ class SpacesStorage(StorageBackend):
 
     async def write_json(self, key: str, data: Any) -> None:
         body = json.dumps(data, indent=2, default=str).encode("utf-8")
-        self._client.put_object(
-            Bucket=self.bucket,
-            Key=key,
-            Body=body,
-            ContentType="application/json",
-        )
+        await self._run_sync(self._put_object_sync, key, body, "application/json")
+        logger.info("Spaces write_json: key=%s size=%d", key, len(body))
+
+        # Verify write is readable (handles Spaces eventual consistency)
+        for attempt in range(3):
+            try:
+                await self._run_sync(self._head_object_sync, key)
+                return  # Write verified
+            except ClientError:
+                logger.warning("Write verification failed (attempt %d/3): key=%s", attempt + 1, key)
+                await asyncio.sleep(0.5)
+        logger.error("Write verification failed after 3 attempts: key=%s", key)
 
     async def delete(self, key: str) -> bool:
         try:
-            self._client.delete_object(Bucket=self.bucket, Key=key)
+            await self._run_sync(self._delete_object_sync, key)
             return True
         except ClientError:
             return False
 
     async def exists(self, key: str) -> bool:
         try:
-            self._client.head_object(Bucket=self.bucket, Key=key)
+            await self._run_sync(self._head_object_sync, key)
             return True
         except ClientError:
             return False
 
     async def list_keys(self, prefix: str) -> list[str]:
-        results = []
-        paginator = self._client.get_paginator("list_objects_v2")
-        for page in paginator.paginate(Bucket=self.bucket, Prefix=prefix):
-            for obj in page.get("Contents", []):
-                results.append(obj["Key"])
-        return results
+        def _list_sync():
+            results = []
+            paginator = self._client.get_paginator("list_objects_v2")
+            for page in paginator.paginate(Bucket=self.bucket, Prefix=prefix):
+                for obj in page.get("Contents", []):
+                    results.append(obj["Key"])
+            return results
+        return await self._run_sync(_list_sync)
 
     async def read_raw(self, key: str) -> bytes | None:
         try:
-            resp = self._client.get_object(Bucket=self.bucket, Key=key)
+            resp = await self._run_sync(self._get_object_sync, key)
             return resp["Body"].read()
         except ClientError as e:
             code = e.response["Error"]["Code"]
@@ -186,12 +221,7 @@ class SpacesStorage(StorageBackend):
             raise
 
     async def write_raw(self, key: str, data: bytes, content_type: str = "application/octet-stream") -> None:
-        self._client.put_object(
-            Bucket=self.bucket,
-            Key=key,
-            Body=data,
-            ContentType=content_type,
-        )
+        await self._run_sync(self._put_object_sync, key, data, content_type)
 
 
 def _create_storage() -> StorageBackend:

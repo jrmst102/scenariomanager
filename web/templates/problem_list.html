@@ -78,6 +78,23 @@
     </main>
 
     <script>
+        // Poll until a problem is readable, then redirect to editor
+        async function waitForProblemAndRedirect(problemId) {
+            const maxAttempts = 8;
+            for (let i = 0; i < maxAttempts; i++) {
+                try {
+                    const check = await fetch(`/api/v1/problems/${problemId}`);
+                    if (check.ok) {
+                        window.location.href = `/problems/${problemId}/edit`;
+                        return;
+                    }
+                } catch (e) { /* retry */ }
+                await new Promise(r => setTimeout(r, 1000));
+            }
+            // Give up polling, redirect anyway (server retry may still succeed)
+            window.location.href = `/problems/${problemId}/edit`;
+        }
+
         document.getElementById('logout-btn').addEventListener('click', async () => {
             await fetch('/auth/logout', {method: 'POST'});
             window.location.href = '/';
@@ -91,7 +108,7 @@
             });
             const data = await res.json();
             if (res.ok) {
-                window.location.href = `/problems/${data.problemId}/edit`;
+                waitForProblemAndRedirect(data.problemId);
             }
         });
 
@@ -103,7 +120,7 @@
             const res = await fetch('/api/v1/problems/upload', {method: 'POST', body: formData});
             const data = await res.json();
             if (res.ok) {
-                window.location.href = `/problems/${data.problemId}/edit`;
+                waitForProblemAndRedirect(data.problemId);
             } else {
                 alert(data.detail || 'Upload failed');
             }
