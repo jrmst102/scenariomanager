@@ -126,7 +126,7 @@ async def create_problem_api(body: CreateProblemRequest, user: dict = Depends(ge
 
 @router.get("/api/v1/problems/{problem_id}")
 async def get_problem_api(problem_id: str, user: dict = Depends(get_current_user)):
-    problem = await get_problem(user["userId"], problem_id)
+    problem = await _get_problem_with_retry(user["userId"], problem_id)
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found")
     return problem
@@ -142,7 +142,7 @@ class UpdateProblemRequest(BaseModel):
 
 @router.put("/api/v1/problems/{problem_id}")
 async def update_problem_api(problem_id: str, body: UpdateProblemRequest, user: dict = Depends(get_current_user)):
-    problem = await get_problem(user["userId"], problem_id)
+    problem = await _get_problem_with_retry(user["userId"], problem_id)
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found")
 
@@ -174,7 +174,7 @@ async def delete_problem_api(problem_id: str, user: dict = Depends(get_current_u
 @router.post("/api/v1/problems/{problem_id}/save")
 async def save_problem_api(problem_id: str, user: dict = Depends(get_current_user)):
     """Explicit save endpoint (same as PUT but clearer intent)."""
-    problem = await get_problem(user["userId"], problem_id)
+    problem = await _get_problem_with_retry(user["userId"], problem_id)
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found")
     await save_problem(user["userId"], problem)
@@ -184,7 +184,7 @@ async def save_problem_api(problem_id: str, user: dict = Depends(get_current_use
 @router.get("/api/v1/problems/{problem_id}/download")
 async def download_problem(problem_id: str, user: dict = Depends(get_current_user)):
     """Download problem as .SCN file."""
-    problem = await get_problem(user["userId"], problem_id)
+    problem = await _get_problem_with_retry(user["userId"], problem_id)
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found")
     filename = f"{problem.get('title', 'problem').replace(' ', '_')}.SCN"
@@ -225,7 +225,7 @@ class AlternativeRequest(BaseModel):
 
 @router.post("/api/v1/problems/{problem_id}/alternatives")
 async def add_alternative_api(problem_id: str, body: AlternativeRequest, user: dict = Depends(get_current_user)):
-    problem = await get_problem(user["userId"], problem_id)
+    problem = await _get_problem_with_retry(user["userId"], problem_id)
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found")
     result = add_alternative(problem, body.name, body.description)
@@ -237,7 +237,7 @@ async def add_alternative_api(problem_id: str, body: AlternativeRequest, user: d
 
 @router.delete("/api/v1/problems/{problem_id}/alternatives/{alt_id}")
 async def remove_alternative_api(problem_id: str, alt_id: str, user: dict = Depends(get_current_user)):
-    problem = await get_problem(user["userId"], problem_id)
+    problem = await _get_problem_with_retry(user["userId"], problem_id)
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found")
     remove_alternative(problem, alt_id)
@@ -251,7 +251,7 @@ class ReorderRequest(BaseModel):
 
 @router.put("/api/v1/problems/{problem_id}/alternatives/reorder")
 async def reorder_alternatives_api(problem_id: str, body: ReorderRequest, user: dict = Depends(get_current_user)):
-    problem = await get_problem(user["userId"], problem_id)
+    problem = await _get_problem_with_retry(user["userId"], problem_id)
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found")
     reorder_alternatives(problem, body.orderedIds)
