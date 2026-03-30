@@ -57,45 +57,34 @@ function updateProgress() {
     }
 }
 
-// Save via the problem API (owner saves to problem directly)
+// Save via the owner assessment API
 async function saveOwnerAssessment(submit = false) {
     const cells = collectCells();
+    const btn = submit ? document.getElementById('submit-btn') : document.getElementById('save-draft-btn');
+    const original = btn.textContent;
+    btn.textContent = submit ? 'Submitting...' : 'Saving...';
+    btn.disabled = true;
 
-    // Save via the main problem update endpoint as owner
-    const res = await fetch(`/api/v1/problems/${PROBLEM_ID}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}), // Trigger save
-    });
+    try {
+        const res = await fetch(`/api/v1/problems/${PROBLEM_ID}/assessment`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cells, submit }),
+        });
 
-    // Also save assessment cells — we'll use a direct save approach
-    const saveRes = await fetch(`/api/v1/problems/${PROBLEM_ID}`, {
-        method: 'GET',
-    });
-    if (!saveRes.ok) return;
-
-    const problem = await saveRes.json();
-    const currentRound = problem.currentRound || 1;
-    const roundKey = `round_${currentRound}`;
-
-    if (!problem.assessments) problem.assessments = {};
-    if (!problem.assessments[roundKey]) problem.assessments[roundKey] = {};
-
-    // Use 'owner' as participant ID for owner assessment
-    problem.assessments[roundKey]['owner'] = cells;
-
-    const putRes = await fetch(`/api/v1/problems/${PROBLEM_ID}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: problem.title }), // minimal update to trigger save
-    });
-
-    if (putRes.ok) {
-        const btn = submit ? document.getElementById('submit-btn') : document.getElementById('save-draft-btn');
-        const original = btn.textContent;
-        btn.textContent = submit ? 'Submitted ✓' : 'Saved ✓';
-        setTimeout(() => { btn.textContent = original; }, 2000);
+        if (res.ok) {
+            btn.textContent = submit ? 'Submitted ✓' : 'Saved ✓';
+            setTimeout(() => { btn.textContent = original; }, 2000);
+        } else {
+            const err = await res.json();
+            btn.textContent = original;
+            alert(err.detail || 'Save failed');
+        }
+    } catch (e) {
+        btn.textContent = original;
+        alert('Connection error');
     }
+    btn.disabled = false;
 }
 
 // Event listeners

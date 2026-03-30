@@ -13,6 +13,7 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
 from app.auth.login_manager import get_current_user
+from app.core.assessments import save_assessment
 from app.core.problems import (
     create_problem,
     delete_problem,
@@ -233,6 +234,28 @@ async def upload_problem(file: UploadFile = File(...), user: dict = Depends(get_
         raise HTTPException(status_code=400, detail="Invalid .SCN file format")
 
     return {"problemId": problem["problemId"], "message": "Problem imported"}
+
+
+# --- Owner Assessment ---
+
+@router.put("/api/v1/problems/{problem_id}/assessment")
+async def save_owner_assessment(
+    problem_id: str, body: dict, user: dict = Depends(get_current_user)
+):
+    """Save the problem owner's assessment for the current round."""
+    problem = await _get_problem_with_retry(user["userId"], problem_id)
+    if not problem:
+        raise HTTPException(status_code=404, detail="Problem not found")
+
+    current_round = problem.get("currentRound", 1)
+    cells = body.get("cells", {})
+    submit = body.get("submit", False)
+
+    save_assessment(problem, current_round, "owner", cells)
+    await save_problem(user["userId"], problem)
+
+    status = "submitted" if submit else "saved"
+    return {"message": f"Assessment {status}", "status": status}
 
 
 # --- Alternative management sub-routes ---
