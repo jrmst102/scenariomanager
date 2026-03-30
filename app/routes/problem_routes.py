@@ -37,7 +37,7 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "web" / "templates"))
 
 
 async def _get_problem_with_retry(
-    user_id: str, problem_id: str, retries: int = 3, delay: float = 0.5
+    user_id: str, problem_id: str, retries: int = 5, delay: float = 1.0
 ) -> dict | None:
     """Get problem with retry to handle storage eventual consistency."""
     for attempt in range(retries):

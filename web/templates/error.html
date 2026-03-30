@@ -8,11 +8,37 @@
 </head>
 <body class="bg-gray-50 min-h-screen flex items-center justify-center">
     <div class="text-center">
-        <h1 class="text-6xl font-bold text-gray-300">{{ status_code }}</h1>
-        <p class="text-xl text-gray-600 mt-4">{{ message }}</p>
+        <h1 class="text-6xl font-bold text-gray-300" id="error-code">{{ status_code }}</h1>
+        <p class="text-xl text-gray-600 mt-4" id="error-message">{{ message }}</p>
+        <p class="text-sm text-gray-400 mt-2 hidden" id="retry-status"></p>
         <a href="/problems" class="inline-block mt-8 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium">
             &larr; Back to Problems
         </a>
     </div>
+    <script>
+        // Auto-retry for 404 on problem pages (handles storage eventual consistency)
+        (function() {
+            const is404 = document.getElementById('error-code').textContent.trim() === '404';
+            const isProblemPage = /^\/problems\/[a-f0-9-]+\//.test(window.location.pathname);
+            if (!is404 || !isProblemPage) return;
+
+            const maxRetries = 3;
+            const retryDelay = 2000;
+            let attempt = 0;
+            const statusEl = document.getElementById('retry-status');
+            statusEl.classList.remove('hidden');
+
+            function retry() {
+                attempt++;
+                if (attempt > maxRetries) {
+                    statusEl.textContent = 'Still not available. The file may take a moment — try refreshing.';
+                    return;
+                }
+                statusEl.textContent = `Retrying... (${attempt}/${maxRetries})`;
+                setTimeout(() => { window.location.reload(); }, retryDelay);
+            }
+            retry();
+        })();
+    </script>
 </body>
 </html>
