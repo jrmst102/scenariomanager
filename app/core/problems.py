@@ -202,6 +202,7 @@ async def import_problem(user_id: str, data: dict) -> dict | None:
     validated["updatedAt"] = now
 
     await storage.write_json(_problem_key(user_id, validated["problemId"]), validated)
+    _problem_cache[_cache_key(user_id, validated["problemId"])] = validated
 
     index = await get_problems_index(user_id)
     index.append({
