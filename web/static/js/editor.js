@@ -3,6 +3,23 @@
  * Handles saving, section toggling, alternative/participant management.
  */
 
+// --- Retry wrapper ---
+// Intercepts 404s, primes the server cache from PROBLEM_DATA, and retries once.
+async function apiFetch(url, options = {}) {
+    let res = await fetch(url, options);
+    if (res.status === 404 && typeof PROBLEM_DATA !== 'undefined') {
+        // Prime the cache on whichever container handled the request
+        await fetch(`/api/v1/problems/${PROBLEM_ID}/prime`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(PROBLEM_DATA),
+        });
+        // Retry the original request
+        res = await fetch(url, options);
+    }
+    return res;
+}
+
 // --- Section Toggling ---
 function toggleSection(id) {
     const el = document.getElementById(id);
@@ -73,7 +90,7 @@ async function saveProblem() {
     if (base) payload.baseProblem = base;
 
     try {
-        const res = await fetch(`/api/v1/problems/${PROBLEM_ID}`, {
+        const res = await apiFetch(`/api/v1/problems/${PROBLEM_ID}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
@@ -110,7 +127,7 @@ document.getElementById('add-alt-btn').addEventListener('click', async () => {
     if (!name) return;
     const desc = prompt('Description (optional):') || '';
 
-    const res = await fetch(`/api/v1/problems/${PROBLEM_ID}/alternatives`, {
+    const res = await apiFetch(`/api/v1/problems/${PROBLEM_ID}/alternatives`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, description: desc }),
@@ -125,7 +142,7 @@ document.getElementById('add-alt-btn').addEventListener('click', async () => {
 
 async function removeAlternative(altId) {
     if (!confirm('Remove this alternative?')) return;
-    const res = await fetch(`/api/v1/problems/${PROBLEM_ID}/alternatives/${altId}`, {
+    const res = await apiFetch(`/api/v1/problems/${PROBLEM_ID}/alternatives/${altId}`, {
         method: 'DELETE',
     });
     if (res.ok) window.location.reload();
@@ -137,7 +154,7 @@ document.getElementById('add-participant-btn').addEventListener('click', async (
     if (!name) return alert('Enter a participant name');
     const pin = document.getElementById('new-participant-pin').value.trim() || null;
 
-    const res = await fetch(`/api/v1/problems/${PROBLEM_ID}/participants`, {
+    const res = await apiFetch(`/api/v1/problems/${PROBLEM_ID}/participants`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, pin }),
@@ -152,7 +169,7 @@ document.getElementById('add-participant-btn').addEventListener('click', async (
 
 async function removeParticipant(pid) {
     if (!confirm('Remove this participant?')) return;
-    const res = await fetch(`/api/v1/problems/${PROBLEM_ID}/participants/${pid}`, {
+    const res = await apiFetch(`/api/v1/problems/${PROBLEM_ID}/participants/${pid}`, {
         method: 'DELETE',
     });
     if (res.ok) window.location.reload();
@@ -167,7 +184,7 @@ function copyLink(token) {
 
 // --- Config ---
 document.getElementById('anonymous-mode').addEventListener('change', async (e) => {
-    await fetch(`/api/v1/problems/${PROBLEM_ID}/config`, {
+    await apiFetch(`/api/v1/problems/${PROBLEM_ID}/config`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ anonymousMode: e.target.checked }),
@@ -175,7 +192,7 @@ document.getElementById('anonymous-mode').addEventListener('change', async (e) =
 });
 
 document.getElementById('pin-protected').addEventListener('change', async (e) => {
-    await fetch(`/api/v1/problems/${PROBLEM_ID}/config`, {
+    await apiFetch(`/api/v1/problems/${PROBLEM_ID}/config`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pinProtected: e.target.checked }),
@@ -185,20 +202,20 @@ document.getElementById('pin-protected').addEventListener('change', async (e) =>
 // --- Round Management ---
 async function closeRound() {
     if (!confirm('Close the current round?')) return;
-    const res = await fetch(`/api/v1/problems/${PROBLEM_ID}/round/close`, { method: 'POST' });
+    const res = await apiFetch(`/api/v1/problems/${PROBLEM_ID}/round/close`, { method: 'POST' });
     if (res.ok) window.location.reload();
     else alert((await res.json()).detail || 'Error');
 }
 
 async function reopenRound() {
-    const res = await fetch(`/api/v1/problems/${PROBLEM_ID}/round/reopen`, { method: 'POST' });
+    const res = await apiFetch(`/api/v1/problems/${PROBLEM_ID}/round/reopen`, { method: 'POST' });
     if (res.ok) window.location.reload();
     else alert((await res.json()).detail || 'Error');
 }
 
 async function newRound() {
     if (!confirm('Open a new round? This will close the current round.')) return;
-    const res = await fetch(`/api/v1/problems/${PROBLEM_ID}/round/new`, { method: 'POST' });
+    const res = await apiFetch(`/api/v1/problems/${PROBLEM_ID}/round/new`, { method: 'POST' });
     if (res.ok) window.location.reload();
     else alert((await res.json()).detail || 'Error');
 }

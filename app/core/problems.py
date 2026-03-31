@@ -21,6 +21,17 @@ _index_cache: dict[str, list[dict]] = {}
 def _cache_key(user_id: str, problem_id: str) -> str:
     return f"{user_id}:{problem_id}"
 
+
+def prime_cache(user_id: str, problem: dict) -> None:
+    """Populate in-memory cache without writing to storage.
+
+    Called by the /prime endpoint so that subsequent API calls on the
+    same container find the problem instantly.
+    """
+    problem_id = problem.get("problemId", "")
+    if problem_id:
+        _problem_cache[_cache_key(user_id, problem_id)] = problem
+
 # Storage key helpers
 def _user_problems_index_key(user_id: str) -> str:
     return f"users/{user_id}/problems/index.json"

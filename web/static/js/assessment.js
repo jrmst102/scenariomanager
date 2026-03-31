@@ -3,6 +3,20 @@
  * Manages score selection, rationale input, draft saving, and submission.
  */
 
+// --- Retry wrapper ---
+async function apiFetch(url, options = {}) {
+    let res = await fetch(url, options);
+    if (res.status === 404 && typeof PROBLEM_DATA !== 'undefined') {
+        await fetch(`/api/v1/problems/${PROBLEM_ID}/prime`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(PROBLEM_DATA),
+        });
+        res = await fetch(url, options);
+    }
+    return res;
+}
+
 // Load existing assessment data
 function loadAssessment() {
     if (typeof PROBLEM_DATA === 'undefined') return;
@@ -73,7 +87,7 @@ async function saveOwnerAssessment(submit = false) {
     }
 
     try {
-        const res = await fetch(`/api/v1/problems/${PROBLEM_ID}/assessment`, {
+        const res = await apiFetch(`/api/v1/problems/${PROBLEM_ID}/assessment`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),

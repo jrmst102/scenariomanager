@@ -20,6 +20,7 @@ from app.core.problems import (
     get_problem,
     get_problems_index,
     import_problem,
+    prime_cache,
     save_problem,
 )
 from app.core.scenarios import (
@@ -150,6 +151,16 @@ async def get_problem_api(problem_id: str, user: dict = Depends(get_current_user
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found")
     return problem
+
+
+@router.post("/api/v1/problems/{problem_id}/prime")
+async def prime_problem_cache(problem_id: str, body: dict, user: dict = Depends(get_current_user)):
+    """Seed the in-memory cache so subsequent API calls on this container succeed."""
+    if not isinstance(body, dict) or body.get("problemId") != problem_id:
+        raise HTTPException(status_code=400, detail="Invalid problem data")
+    prime_cache(user["userId"], body)
+    logger.info("Cache primed for problem=%s user=%s", problem_id, user["userId"])
+    return {"message": "Cache primed"}
 
 
 class UpdateProblemRequest(BaseModel):
