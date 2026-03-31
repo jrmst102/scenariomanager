@@ -218,11 +218,11 @@
 
         <!-- Quick Links -->
         <div class="flex gap-4">
-            <a href="/problems/{{ problem.problemId }}/assess"
+            <a href="/problems/{{ problem.problemId }}/assess" onclick="return verifyAndNavigate(event)"
                class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium">
                 My Assessment →
             </a>
-            <a href="/problems/{{ problem.problemId }}/results"
+            <a href="/problems/{{ problem.problemId }}/results" onclick="return verifyAndNavigate(event)"
                class="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition font-medium">
                 View Results →
             </a>
@@ -231,6 +231,26 @@
 
     <script>
         const PROBLEM_ID = '{{ problem.problemId }}';
+
+        // Verify the problem is readable via API before navigating to another page.
+        // Prevents 404s caused by cross-container cache misses.
+        async function verifyAndNavigate(e) {
+            e.preventDefault();
+            const link = e.currentTarget;
+            const href = link.getAttribute('href');
+            link.style.opacity = '0.6';
+            link.style.pointerEvents = 'none';
+            try {
+                const res = await fetch(`/api/v1/problems/${PROBLEM_ID}`);
+                if (res.ok) {
+                    window.location.href = href;
+                    return;
+                }
+            } catch (err) { /* fall through */ }
+            // API call primed the server cache on whichever container handled it;
+            // navigate anyway — the page route retry should now succeed.
+            window.location.href = href;
+        }
     </script>
     <script src="/static/js/editor.js"></script>
 </body>

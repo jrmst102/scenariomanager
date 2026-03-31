@@ -16,7 +16,7 @@
 </head>
 <body class="bg-white min-h-screen">
     <nav class="bg-gray-100 px-6 py-3 flex items-center justify-between no-print">
-        <a href="/problems/{{ problem.problemId }}/results" class="text-gray-500 hover:text-gray-700">&larr; Results</a>
+        <a href="/problems/{{ problem.problemId }}/results" onclick="return verifyAndNavigate(event)" class="text-gray-500 hover:text-gray-700">&larr; Results</a>
         <button onclick="window.print()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm font-medium">
             Print / Save PDF
         </button>
@@ -141,6 +141,20 @@
     <script id="server-data" type="application/json">{{ problem | tojson }}</script>
     <script>
         const PROBLEM_DATA = JSON.parse(document.getElementById('server-data').textContent);
+        const PROBLEM_ID = PROBLEM_DATA.problemId;
+
+        async function verifyAndNavigate(e) {
+            e.preventDefault();
+            const link = e.currentTarget;
+            const href = link.getAttribute('href');
+            link.style.opacity = '0.6';
+            link.style.pointerEvents = 'none';
+            try {
+                const res = await fetch(`/api/v1/problems/${PROBLEM_ID}`);
+                if (res.ok) { window.location.href = href; return; }
+            } catch (err) { /* fall through */ }
+            window.location.href = href;
+        }
     </script>
     <script src="/static/js/results.js"></script>
 </body>

@@ -16,28 +16,39 @@
         </a>
     </div>
     <script>
-        // Auto-retry for 404 on problem pages (handles storage eventual consistency)
+        // Smart retry for 404 on problem pages: poll API silently, reload only when ready
         (function() {
             const is404 = document.getElementById('error-code').textContent.trim() === '404';
-            const isProblemPage = /^\/problems\/[a-f0-9-]+\//.test(window.location.pathname);
-            if (!is404 || !isProblemPage) return;
+            const match = window.location.pathname.match(/^\/problems\/([a-f0-9-]+)\//);
+            if (!is404 || !match) return;
 
-            const maxRetries = 3;
-            const retryDelay = 2000;
-            let attempt = 0;
+            const problemId = match[1];
             const statusEl = document.getElementById('retry-status');
             statusEl.classList.remove('hidden');
+            statusEl.textContent = 'Waiting for storage sync...';
 
-            function retry() {
+            let attempt = 0;
+            const maxAttempts = 10;
+            const interval = 2000;
+
+            async function poll() {
                 attempt++;
-                if (attempt > maxRetries) {
-                    statusEl.textContent = 'Still not available. The file may take a moment — try refreshing.';
+                if (attempt > maxAttempts) {
+                    statusEl.textContent = 'Storage sync timed out. Please try refreshing.';
                     return;
                 }
-                statusEl.textContent = `Retrying... (${attempt}/${maxRetries})`;
-                setTimeout(() => { window.location.reload(); }, retryDelay);
+                statusEl.textContent = `Waiting for storage sync... (${attempt}/${maxAttempts})`;
+                try {
+                    const res = await fetch(`/api/v1/problems/${problemId}`);
+                    if (res.ok) {
+                        statusEl.textContent = 'Ready — reloading...';
+                        window.location.reload();
+                        return;
+                    }
+                } catch (e) { /* network error, keep polling */ }
+                setTimeout(poll, interval);
             }
-            retry();
+            setTimeout(poll, interval);
         })();
     </script>
 </body>

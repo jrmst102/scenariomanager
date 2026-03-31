@@ -10,11 +10,11 @@
 <body class="bg-gray-50 min-h-screen">
     <nav class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
         <div class="flex items-center gap-4">
-            <a href="/problems/{{ problem.problemId }}/edit" class="text-gray-500 hover:text-gray-700">&larr; Editor</a>
+            <a href="/problems/{{ problem.problemId }}/edit" onclick="return verifyAndNavigate(event)" class="text-gray-500 hover:text-gray-700">&larr; Editor</a>
             <h1 class="text-lg font-bold text-gray-900">Results Dashboard</h1>
         </div>
         <div class="flex items-center gap-3">
-            <a href="/problems/{{ problem.problemId }}/report" target="_blank"
+            <a href="/problems/{{ problem.problemId }}/report" target="_blank" onclick="return verifyAndNavigate(event)"
                class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 text-sm font-medium">
                 📄 Print Report
             </a>
@@ -80,6 +80,19 @@
     <script>
         const PROBLEM_DATA = JSON.parse(document.getElementById('server-data').textContent);
         const PROBLEM_ID = PROBLEM_DATA.problemId;
+
+        async function verifyAndNavigate(e) {
+            e.preventDefault();
+            const link = e.currentTarget;
+            const href = link.getAttribute('href');
+            link.style.opacity = '0.6';
+            link.style.pointerEvents = 'none';
+            try {
+                const res = await fetch(`/api/v1/problems/${PROBLEM_ID}`);
+                if (res.ok) { window.location.href = href; return; }
+            } catch (err) { /* fall through */ }
+            window.location.href = href;
+        }
     </script>
     <script src="/static/js/results.js"></script>
 </body>
