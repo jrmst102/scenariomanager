@@ -65,11 +65,18 @@ async function saveOwnerAssessment(submit = false) {
     btn.textContent = submit ? 'Submitting...' : 'Saving...';
     btn.disabled = true;
 
+    // Include full problem data so the server can save even without
+    // having the problem cached locally (cross-container fallback).
+    const payload = { cells, submit };
+    if (typeof PROBLEM_DATA !== 'undefined') {
+        payload.baseProblem = PROBLEM_DATA;
+    }
+
     try {
         const res = await fetch(`/api/v1/problems/${PROBLEM_ID}/assessment`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ cells, submit }),
+            body: JSON.stringify(payload),
         });
 
         if (res.ok) {

@@ -59,13 +59,30 @@ async function saveProblem() {
     const statusEl = document.getElementById('save-status');
     statusEl.textContent = 'Saving...';
 
+    // Merge edits into a copy of the full problem so the server can
+    // save even when it doesn't have the problem cached locally.
+    const base = (typeof PROBLEM_DATA !== 'undefined') ? { ...PROBLEM_DATA } : null;
+    if (base) {
+        if (data.title !== undefined) base.title = data.title;
+        if (data.description !== undefined) base.description = data.description;
+        if (data.axes) base.axes = data.axes;
+        if (data.scenarios) base.scenarios = data.scenarios;
+    }
+
+    const payload = { ...data };
+    if (base) payload.baseProblem = base;
+
     try {
         const res = await fetch(`/api/v1/problems/${PROBLEM_ID}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
+            body: JSON.stringify(payload),
         });
         if (res.ok) {
+            // Keep PROBLEM_DATA in sync so the next save also has fresh data
+            if (typeof PROBLEM_DATA !== 'undefined' && base) {
+                Object.assign(PROBLEM_DATA, base);
+            }
             statusEl.textContent = 'Saved ✓';
             setTimeout(() => { statusEl.textContent = ''; }, 2000);
         } else {

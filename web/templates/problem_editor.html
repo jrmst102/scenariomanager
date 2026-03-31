@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ problem.title or 'Problem Editor' }} — Scenario Planning Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/style.css?v=2">
 </head>
 <body class="bg-gray-50 min-h-screen">
     <nav class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
@@ -229,8 +229,10 @@
         </div>
     </main>
 
+    <script id="server-data" type="application/json">{{ problem | tojson }}</script>
     <script>
-        const PROBLEM_ID = '{{ problem.problemId }}';
+        const PROBLEM_DATA = JSON.parse(document.getElementById('server-data').textContent);
+        const PROBLEM_ID = PROBLEM_DATA.problemId;
 
         // Verify the problem is readable via API before navigating to another page.
         // Prevents 404s caused by cross-container cache misses.
@@ -252,6 +254,6 @@
             window.location.href = href;
         }
     </script>
-    <script src="/static/js/editor.js"></script>
+    <script src="/static/js/editor.js?v=2"></script>
 </body>
 </html>

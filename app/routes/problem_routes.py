@@ -158,11 +158,15 @@ class UpdateProblemRequest(BaseModel):
     axes: dict | None = None
     scenarios: list[dict] | None = None
     alternatives: list[dict] | None = None
+    baseProblem: dict | None = None
 
 
 @router.put("/api/v1/problems/{problem_id}")
 async def update_problem_api(problem_id: str, body: UpdateProblemRequest, user: dict = Depends(get_current_user)):
     problem = await _get_problem_with_retry(user["userId"], problem_id)
+    if not problem and body.baseProblem and body.baseProblem.get("problemId") == problem_id:
+        logger.warning("Using client-provided baseProblem fallback: problem=%s", problem_id)
+        problem = body.baseProblem
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found")
 
@@ -244,6 +248,11 @@ async def save_owner_assessment(
 ):
     """Save the problem owner's assessment for the current round."""
     problem = await _get_problem_with_retry(user["userId"], problem_id)
+    if not problem:
+        base = body.get("baseProblem")
+        if base and isinstance(base, dict) and base.get("problemId") == problem_id:
+            logger.warning("Using client-provided baseProblem fallback for assessment: problem=%s", problem_id)
+            problem = base
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found")
 

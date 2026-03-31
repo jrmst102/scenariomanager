@@ -14,6 +14,10 @@ logger = logging.getLogger(__name__)
 # even when the storage backend has eventual-consistency delays.
 _problem_cache: dict[str, dict] = {}
 
+# In-memory index cache: {"userId": [index_entries]}
+# Same write-through pattern so the problem list is never stale on the same worker.
+_index_cache: dict[str, list[dict]] = {}
+
 def _cache_key(user_id: str, problem_id: str) -> str:
     return f"{user_id}:{problem_id}"
 
@@ -94,15 +98,21 @@ def new_problem_template(title: str = "", description: str = "") -> dict:
 
 async def get_problems_index(user_id: str) -> list[dict]:
     """Get the list of problems for a user."""
+    cached = _index_cache.get(user_id)
+    if cached is not None:
+        return cached
     data = await storage.read_json(_user_problems_index_key(user_id))
     if data is None:
         return []
-    return data.get("problems", [])
+    result = data.get("problems", [])
+    _index_cache[user_id] = result
+    return result
 
 
 async def save_problems_index(user_id: str, problems: list[dict]) -> None:
     """Save the problems index for a user."""
     await storage.write_json(_user_problems_index_key(user_id), {"problems": problems})
+    _index_cache[user_id] = problems
 
 
 async def create_problem(user_id: str, title: str = "", description: str = "") -> dict:
@@ -185,6 +195,7 @@ async def save_problem(user_id: str, problem: dict) -> None:
 async def delete_problem(user_id: str, problem_id: str) -> bool:
     """Delete a problem and remove from index."""
     _problem_cache.pop(_cache_key(user_id, problem_id), None)
+    _index_cache.pop(user_id, None)
     deleted = False
     for key in _problem_lookup_keys(user_id, problem_id):
         deleted = await storage.delete(key) or deleted
